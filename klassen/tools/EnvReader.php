@@ -1,6 +1,6 @@
 <?php
 
-namespace Vendor\KLASSEN\TOOLS;
+namespace Vendor\Dbapi\Klassen\Tools;
 
 use Exception;
 
@@ -9,7 +9,7 @@ class EnvReader
 
     public $env = [];
 
-    private $filepath = "./vendor/.env";
+    private $filepath = "./vendor/dbapi/.env";
 
 
     public function __construct($filepath = null)

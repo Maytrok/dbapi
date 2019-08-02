@@ -1,6 +1,6 @@
 <?php
 
-namespace Vendor\KLASSEN\TOOLS;
+namespace Vendor\Dbapi\Klassen\Tools;
 
 class App
 {

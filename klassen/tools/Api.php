@@ -1,11 +1,11 @@
 <?php
 
-namespace Vendor\KLASSEN\TOOLS;
+namespace Vendor\Dbapi\Klassen\Tools;
 
 use Exception;
-use Vendor\Klassen\Datenbank\ModelBasic;
-use Vendor\Klassen\Datenbank\Datenbank;
-use Vendor\INTERFACES\ModelProps;
+use Vendor\Dbapi\Klassen\Datenbank\ModelBasic;
+use Vendor\Dbapi\Klassen\Datenbank\Datenbank;
+use Vendor\Dbapi\Interfaces\ModelProps;
 
 class API
 {

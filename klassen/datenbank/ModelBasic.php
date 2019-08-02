@@ -1,10 +1,10 @@
 <?php
 
-namespace Vendor\Klassen\Datenbank;
+namespace Vendor\Dbapi\Klassen\Datenbank;
 
 
 use Exception;
-use Vendor\INTERFACES\ModelProps;
+use Vendor\Dbapi\Interfaces\ModelProps;
 
 /**
  * public static function getTableName();

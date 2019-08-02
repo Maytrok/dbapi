@@ -1,10 +1,10 @@
 <?php
 
-namespace Vendor\Klassen\Datenbank;
+namespace Vendor\Dbapi\Klassen\Datenbank;
 
 use PDO;
 use Exception;
-use Vendor\KLASSEN\TOOLS\EnvReader;
+use Vendor\dbapi\Klassen\Tools\EnvReader;
 
 class Datenbank extends PDO
 {
