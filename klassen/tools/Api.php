@@ -7,7 +7,7 @@ use Vendor\Dbapi\Klassen\Datenbank\ModelBasic;
 use Vendor\Dbapi\Klassen\Datenbank\Datenbank;
 use Vendor\Dbapi\Interfaces\ModelProps;
 
-class API
+class Api extends APISimple
 {
 
     /**
@@ -19,64 +19,45 @@ class API
         $this->model = $_model;
     }
 
-    public function run()
+    protected function get()
     {
-        self::setJSONHeader();
-        try {
-            switch ($_SERVER['REQUEST_METHOD']) {
-                case 'GET':
-                    // Single
-                    if (isset($_GET['id'])) {
-                        echo json_encode(Datenbank::get($this->model::getDB(), $this->model::getTableName(), $_GET['id']));
-                    } else {
-                        echo json_encode(Datenbank::getAll($this->model::getDB(), $this->model::getTableName()));
-                    }
-                    return;
-                case "POST":
-                    $in = in_array(getallheaders()['Content-Type'], ["application/json", "application/json;charset=utf-8"])  ? $this->getParamBody() : $_POST;
-                    $this->checkParams($in);
-                    $this->model->setProperties($in);
-                    $this->saveModel(201);
-
-                    return;
-                case 'PATCH':
-                    $in = $this->getParamBody();
-                    $id = $this->idExists();
-                    $this->initModel($id);
-                    $this->model->setProperties($in);
-                    $this->saveModel();
-                    return;
-                case 'DELETE':
-                    $id = $this->idExists();
-                    $this->initModel($id);
-                    $this->model->delete();
-
-                    echo json_encode(["erfolg" => true]);
-
-                    return;
-                case 'OPTIONS':
-                    header("access-control-allow-methods: GET,POST,PATCH,DELETE");
-                    header("access-control-allow-origin: http://localhost:8080");
-                    header("access-control-allow-credentials: true");
-                    header("access-control-allow-headers: content-type");
-                    return;
-
-                default;
-                    throw new Exception("Request Method not Allowed", 405);
-            }
-        } catch (\Throwable $th) {
-            $code = $th->getCode() == 0 ? 500 : $th->getCode();
-            http_response_code($code);
-
-            if (App::$DEBUG) {
-                echo json_encode([
-                    "error" => $th->getMessage(), "trace" => $th->getTrace(),
-                    "DB" => Datenbank::getPDO()->errorInfo()
-                ]);
-            } else {
-                echo json_encode(["error" => $th->getMessage()]);
-            }
+        // Single
+        if (isset($_GET['id'])) {
+            echo json_encode(Datenbank::get($this->model::getDB(), $this->model::getTableName(), $_GET['id']));
+        } else {
+            echo json_encode(Datenbank::getAll($this->model::getDB(), $this->model::getTableName()));
         }
+    }
+
+    protected function post()
+    {
+        $in = in_array(getallheaders()['Content-Type'], ["application/json", "application/json;charset=utf-8"])  ? $this->getParamBody() : $_POST;
+        $this->checkParams($in);
+        $this->model->setProperties($in);
+        $this->saveModel(201);
+
+        return;
+    }
+
+    protected function patch()
+    {
+        $in = $this->getParamBody();
+        $id = $this->idExists();
+        $this->initModel($id);
+        $this->model->setProperties($in);
+        $this->saveModel();
+        return;
+    }
+
+    protected function delete()
+    {
+        $id = $this->idExists();
+        $this->initModel($id);
+        $this->model->delete();
+
+        echo json_encode(["erfolg" => true]);
+
+        return;
     }
 
     /**
@@ -93,10 +74,7 @@ class API
         }
     }
 
-    private function getParamBody()
-    {
-        return $this->parse(file_get_contents("php://input"));
-    }
+
 
     /**
      * Speichert ein neues Modell ab
@@ -121,30 +99,6 @@ class API
         }
     }
 
-    /**
-     * Parst den Input. Entweder key/value oder ein json string
-     * @param string 
-     * @return array
-     * @throws Exception
-     */
-    private function parse($string)
-    {
-        if (in_array(getallheaders()['Content-Type'], ["application/json", "application/json;charset=utf-8"])) {
-            return json_decode($string, true);
-        }
-        $temp = explode("&", $string);
-        $in = [];
-        foreach ($temp as $value) {
-            $item = explode("=", $value);
-            $in[$item[0]] = urldecode($item[1]);
-        }
-
-        if (!is_array($in)) {
-            throw new Exception("Can not Parse Parameter", 400);
-        }
-
-        return $in;
-    }
 
     /**
      * Wurden bei der Anfrage alle notwendigen Parameter gesetzt
@@ -179,10 +133,5 @@ class API
             throw new Exception("The ID has not been provided", 405);
             return false;
         }
-    }
-
-    public static function setJSONHeader()
-    {
-        header('Content-Type: application/json');
     }
 }
