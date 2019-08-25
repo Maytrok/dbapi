@@ -62,8 +62,8 @@ class Api extends APISimple
 
     /**
      * Laed die Instanz
-     * @param int
-     * @throws Exeption
+     * @param int $id
+     * @throws Exception Exception
      */
     private function initModel($id)
     {
@@ -78,14 +78,14 @@ class Api extends APISimple
 
     /**
      * Speichert ein neues Modell ab
-     * @throws Exception
+     * @throws Exception Exception
+     * @return bool
      */
     private function saveModel($statuscode = 200)
     {
         $res = $this->model->save();
         if ($res === false) {
             throw new Exception("Database Exception", 500);
-            return false;
         } else if (is_numeric($res)) {
 
             if ($statuscode != 200) {
@@ -108,7 +108,7 @@ class Api extends APISimple
     private function checkParams($input)
     {
 
-        $req = $this->model instanceof ModelProps ? $this->model->requiredProps() : $this->model->getProperies();
+        $req = $this->model instanceof ModelProps ? $this->model->requiredProps() : $this->model->getProperties();
 
         foreach ($req as $value) {
             if (!in_array($value, array_keys($input))) {
@@ -131,7 +131,6 @@ class Api extends APISimple
             return $_GET['id'];
         } else {
             throw new Exception("The ID has not been provided", 405);
-            return false;
         }
     }
 }

@@ -158,7 +158,7 @@ use Vendor\Dbapi\Interfaces\ModelProps;";
 
     $this->body .= "
         
-  protected function getProperties()
+  public function getProperties()
   {
     return array_keys(get_class_vars(self::class));   
   }";

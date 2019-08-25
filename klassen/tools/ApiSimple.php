@@ -129,7 +129,7 @@ class APISimple
 
     /**
      * Parst den Input. Entweder key/value oder ein json string
-     * @param string 
+     * @param string $string
      * @return array
      * @throws Exception
      */

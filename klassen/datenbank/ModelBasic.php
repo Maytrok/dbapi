@@ -10,7 +10,7 @@ use Vendor\Dbapi\Interfaces\ModelProps;
  * public static function getTableName();
  * public static function getDB();
  * /**
- * @return array
+ * @ return array
  * array_keys(get_class_vars(self::class))
  * Es werden alle Properties fuer die Klasse definiert 
  * protected function getProperties();
@@ -20,9 +20,6 @@ abstract class ModelBasic
 
     private $id = 0;
     private $initSuccess = false;
-    /**
-     * @var array
-     */
 
     abstract public static function getTableName();
     abstract public static function getDB();
@@ -31,7 +28,7 @@ abstract class ModelBasic
      * array_keys(get_class_vars(self::class))
      * Es werden alle Properties fuer die Klasse definiert
      */
-    abstract protected function getProperties();
+    abstract public function getProperties();
 
     function getId()
     {

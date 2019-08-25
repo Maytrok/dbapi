@@ -31,7 +31,7 @@ class Datenbank extends PDO
     /**
      * Init mit ID
      * @param int $id
-     * @return array 
+     * @return array
      */
     public static function get($db, $table, $id)
     {
@@ -41,8 +41,6 @@ class Datenbank extends PDO
         $sth->execute();
         if ($sth->rowCount() == 0) {
             throw new Exception("Requested item not found", 404);
-
-            return false;
         }
         $res = utf8encodeArray($sth->fetch());
         return $res;
@@ -54,8 +52,6 @@ class Datenbank extends PDO
         $sth->execute();
         if ($sth->rowCount() == 0) {
             throw new Exception("Table not found or empty", 404);
-
-            return false;
         }
         $res = utf8encodeArray($sth->fetchAll());
         return $res;
