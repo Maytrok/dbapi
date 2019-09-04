@@ -14,6 +14,7 @@ class Api extends APISimple
      * @var ModelBasic
      */
     private  $model;
+
     public function __construct(ModelBasic $_model)
     {
         $this->model = $_model;
@@ -132,5 +133,44 @@ class Api extends APISimple
         } else {
             throw new Exception("The ID has not been provided", 405);
         }
+    }
+
+
+    public function getAllowedMethods()
+    {
+        $res = [];
+
+        foreach ($this->availableMethods as $value) {
+
+            $res[] = substr(strtoupper($value), 1);
+        }
+
+        $res[] = "OPTIONS";
+
+        return $res;
+    }
+    /**
+     * Disallow Method
+     * @param string|array $methods
+     */
+    public function disallowMethod($methods)
+    {
+
+        if (is_array($methods)) {
+            foreach ($methods as $value) {
+                $this->removeMethodFromArray($value);
+            }
+        } else {
+            $this->removeMethodFromArray($methods);
+        }
+    }
+
+    private function removeMethodFromArray($method)
+    {
+        if (!in_array($method, $this->availableMethods)) {
+            throw new Exception("Methode is not included in the Array. Please make sure you add a '_' before the Method name", 1);
+        }
+
+        array_splice($this->availableMethods, array_search($method, $this->availableMethods), 1);
     }
 }
