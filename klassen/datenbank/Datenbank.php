@@ -12,13 +12,15 @@ class Datenbank extends PDO
     private static $connection = null;
 
     /**
+     * @param EnvReader $reader
      * @return PDO
      */
-    public static function getPDO()
+    public static function getPDO($reader = null)
     {
 
         if (!self::$connection) {
-            $env = new EnvReader();
+
+            $env = $reader == null ? new EnvReader() : $reader;
             $user = $env->env['USER'];
             $password = $env->env['PASSWORD'];
             $server = $env->env['SERVER'];
