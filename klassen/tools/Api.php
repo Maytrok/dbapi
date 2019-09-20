@@ -43,7 +43,7 @@ class Api extends APISimple
     protected function patch()
     {
         $in = $this->getParamBody();
-        $id = $this->idExists();
+        $id = $this->getRequestID();
         $this->initModel($id);
         $this->model->setProperties($in);
         $this->saveModel();
@@ -52,7 +52,7 @@ class Api extends APISimple
 
     protected function delete()
     {
-        $id = $this->idExists();
+        $id = $this->getRequestID();
         $this->initModel($id);
         $this->model->delete();
 
@@ -121,8 +121,10 @@ class Api extends APISimple
 
     /**
      * Wurde die ID richtig gesetzt
+     * @return int $id
+     * @throws Exception
      */
-    private function idExists()
+    private function getRequestID()
     {
         if (isset($_GET['id'])) {
 
@@ -135,7 +137,10 @@ class Api extends APISimple
         }
     }
 
-
+    /**
+     * Gibt alle erlaubten Methoden zurueck
+     * @return array $array
+     */
     public function getAllowedMethods()
     {
         $res = [];
