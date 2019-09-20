@@ -59,6 +59,36 @@ class Datenbank extends PDO
         return $res;
     }
 
+    /**
+     * @param string $db Databasename
+     * @param string $table Tablename
+     * @param array $where 
+     * @return array
+     */
+    public static function where($db, $table, $where)
+    {
+
+        $query = "SELECT * from " . $db . "." . $table . " where ";
+
+        if (!is_array($where)) {
+            throw new Exception("Where Param has to be an array", 500);
+        }
+
+        $parms = [];
+        $qusub = "";
+
+        foreach ($where as $key => $value) {
+            $qusub .= "and " . $key . "= ?";
+            $parms[] = $value;
+        }
+
+        $query .= substr($qusub, 4);
+
+        $sth = self::getPDO()->prepare($query);
+        $sth->execute($parms);
+        return $sth->fetchAll();
+    }
+
     public static function create($db, $table, array $arr)
     {
         $query = "INSERT INTO  " . $db . "." . $table . " (";

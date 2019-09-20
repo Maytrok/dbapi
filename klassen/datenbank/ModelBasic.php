@@ -44,10 +44,16 @@ abstract class ModelBasic
     }
 
 
+    /**
+     * @param int
+     * @throws Exception
+     * @return bool
+     */
     public function get($id)
     {
+
         if (!$result = Datenbank::get($this::getDB(), $this::getTableName(), $id)) {
-            return false;
+            throw new Exception("Ressource not found", 404);
         }
 
         foreach ($result as $key => $value) {
@@ -109,5 +115,23 @@ abstract class ModelBasic
                 throw new Exception("Es wurden nicht alle Props fuer die die Instanz gesetzt. Speichern nocht moeglich " . $value, 500);
             }
         }
+    }
+
+    /**
+     * @param array $params
+     * @throws Exception
+     * @return array
+     */
+    public static function where($params)
+    {
+
+        if (!$result = Datenbank::where($this::getDB(), $this::getTableName(), $params)) {
+            throw new Exception("Ressources not found", 404);
+        }
+
+        if (count($result) == 0) {
+            throw new Exception("Ressources not found", 404);
+        }
+        return $result;
     }
 }
