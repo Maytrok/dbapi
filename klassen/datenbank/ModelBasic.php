@@ -124,10 +124,7 @@ abstract class ModelBasic
      */
     public function where($params)
     {
-
-        if (!$result = Datenbank::where($this::getDB(), $this::getTableName(), $params)) {
-            throw new Exception("Malformed where Request", 400);
-        }
+        $result = Datenbank::where($this::getDB(), $this::getTableName(), $params);
 
         if (count($result) == 0) {
             throw new Exception($this->noRessourceFound(), 404);
