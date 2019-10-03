@@ -3,6 +3,7 @@
 namespace Vendor\Dbapi\Klassen\Tools;
 
 use Exception;
+use Throwable;
 use Vendor\Dbapi\Klassen\Datenbank\Datenbank;
 
 class APISimple
@@ -127,22 +128,7 @@ class APISimple
                     throw new Exception("Request Method not Allowed", 405);
             }
         } catch (\Throwable $th) {
-            $code = $th->getCode() == 0 ? 500 : $th->getCode();
-            if (!is_int($code)) {
-                http_response_code(400);
-            } else {
-
-                http_response_code($code);
-            }
-
-            if (App::$DEBUG) {
-                echo json_encode([
-                    "error" => $th->getMessage(), "trace" => $th->getTrace(),
-                    "DB" => Datenbank::getPDO()->errorInfo()
-                ]);
-            } else {
-                echo json_encode(["error" => $th->getMessage()]);
-            }
+            $this->handleError($th);
         }
     }
 
@@ -247,6 +233,26 @@ class APISimple
             }
         } else {
             return true;
+        }
+    }
+
+    protected function handleError(Throwable $th)
+    {
+        $code = $th->getCode() == 0 ? 500 : $th->getCode();
+        if (!is_int($code)) {
+            http_response_code(400);
+        } else {
+
+            http_response_code($code);
+        }
+
+        if (App::$DEBUG) {
+            echo json_encode([
+                "error" => $th->getMessage(), "trace" => $th->getTrace(),
+                "DB" => Datenbank::getPDO()->errorInfo()
+            ]);
+        } else {
+            echo json_encode(["error" => $th->getMessage()]);
         }
     }
 }

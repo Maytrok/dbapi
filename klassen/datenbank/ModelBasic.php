@@ -53,7 +53,7 @@ abstract class ModelBasic
     {
 
         if (!$result = Datenbank::get($this::getDB(), $this::getTableName(), $id)) {
-            throw new Exception("Ressource not found", 404);
+            throw new Exception($this->noRessourceFound(), 404);
         }
 
         foreach ($result as $key => $value) {
@@ -126,21 +126,26 @@ abstract class ModelBasic
     {
 
         if (!$result = Datenbank::where($this::getDB(), $this::getTableName(), $params)) {
-            throw new Exception("Ressources not found", 404);
+            throw new Exception($this->noRessourceFound(), 404);
         }
 
         if (count($result) == 0) {
-            throw new Exception("Ressources not found", 404);
+            throw new Exception($this->noRessourceFound(), 404);
         }
 
 
         if (count($result) > 1) {
-            throw new Exception("To Many Result for the Where Request", 413);
+            throw new Exception("To many Result for the where Request", 413);
         }
 
 
         $this->setProperties($result[0]);
 
         return $this->initSuccess = true;
+    }
+
+    protected function noRessourceFound()
+    {
+        return "Ressource not found";
     }
 }
