@@ -11,6 +11,8 @@ class Datenbank extends PDO
 
     private static $connection = null;
 
+    public static $throwExceptionOnNotFound = false;
+
     public static function openConnection($user, $password, $server = "localhost")
     {
         $opt = [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC];
@@ -47,8 +49,10 @@ class Datenbank extends PDO
         $sth = self::getPDO()->prepare("SELECT * from " . $db . "." . $table . " where id = :id");
         $sth->bindParam(":id", $id, PDO::PARAM_INT);
         $sth->execute();
-        if ($sth->rowCount() == 0) {
-            throw new Exception("Requested item not found", 404);
+        if (self::$throwExceptionOnNotFound) {
+            if ($sth->rowCount() == 0) {
+                throw new Exception("Requested item not found", 404);
+            }
         }
         $res = utf8encodeArray($sth->fetch());
         return $res;
@@ -64,8 +68,10 @@ class Datenbank extends PDO
 
         $sth = self::getPDO()->prepare($query);
         $sth->execute();
-        if ($sth->rowCount() == 0) {
-            throw new Exception("Ressource not found", 404);
+        if (self::$throwExceptionOnNotFound) {
+            if ($sth->rowCount() == 0) {
+                throw new Exception("Ressource not found", 404);
+            }
         }
         $res = utf8encodeArray($sth->fetchAll());
         return $res;
@@ -103,8 +109,10 @@ class Datenbank extends PDO
 
         $sth = self::getPDO()->prepare($query);
         $sth->execute($parms);
-        if ($sth->rowCount() == 0) {
-            throw new Exception("Ressource not found", 404);
+        if (self::$throwExceptionOnNotFound) {
+            if ($sth->rowCount() == 0) {
+                throw new Exception("Ressource not found", 404);
+            }
         }
         return $sth->fetchAll();
     }
