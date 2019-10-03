@@ -253,6 +253,16 @@ class APISimple
             ]);
         } else {
             echo json_encode(["error" => $th->getMessage()]);
+
+            exit();
+        }
+    }
+
+    public static final function handleOptionCall()
+    {
+        if ($_SERVER['REQUEST_METHOD'] == "OPTIONS") {
+            $this->options();
+            exit();
         }
     }
 }
