@@ -128,7 +128,7 @@ class APISimple
                     throw new Exception("Request Method not Allowed", 405);
             }
         } catch (\Throwable $th) {
-            $this->handleError($th);
+            self::handleError($th);
         }
     }
 
@@ -236,7 +236,7 @@ class APISimple
         }
     }
 
-    protected function handleError(Throwable $th)
+    public static function handleError(Throwable $th)
     {
         $code = $th->getCode() == 0 ? 500 : $th->getCode();
         if (!is_int($code)) {
