@@ -11,6 +11,12 @@ class Datenbank extends PDO
 
     private static $connection = null;
 
+    public static function openConnection($user, $password, $server = "localhost")
+    {
+        $opt = [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC];
+        self::$connection = new PDO("mysql:host=" . $server . ";charset=utf8", $user,  $password, $opt);
+    }
+
     /**
      * @param EnvReader $reader
      * @return PDO
@@ -48,12 +54,18 @@ class Datenbank extends PDO
         return $res;
     }
 
-    public static function getAll($db, $table)
+    public static function getAll($db, $table, $limit = null, $page = null)
     {
-        $sth = self::getPDO()->prepare("SELECT * from " . $db . "." . $table);
+        $query = "SELECT * from " . $db . "." . $table;
+
+        if ($limit && $page) {
+            $query .= self::handleLimit($limit, $page);
+        }
+
+        $sth = self::getPDO()->prepare($query);
         $sth->execute();
         if ($sth->rowCount() == 0) {
-            throw new Exception("Table not found or empty", 404);
+            throw new Exception("Ressource not found", 404);
         }
         $res = utf8encodeArray($sth->fetchAll());
         return $res;
@@ -65,7 +77,7 @@ class Datenbank extends PDO
      * @param array $where 
      * @return array
      */
-    public static function where($db, $table, $where)
+    public static function where($db, $table, $where, $limit = null, $page = null)
     {
 
         $query = "SELECT * from " . $db . "." . $table . " where ";
@@ -84,9 +96,42 @@ class Datenbank extends PDO
 
         $query .= substr($qusub, 4);
 
+
+        if ($limit && $page) {
+            $query .= self::handleLimit($limit, $page);
+        }
+
         $sth = self::getPDO()->prepare($query);
         $sth->execute($parms);
+        if ($sth->rowCount() == 0) {
+            throw new Exception("Ressource not found", 404);
+        }
         return $sth->fetchAll();
+    }
+
+    public static function countResults($db, $table, $where = null)
+    {
+        $query = "select count(*) count from " . $db . "." . $table;
+
+        $parms = [];
+        if ($where) {
+
+            $query .= " where ";
+
+            $qusub = "";
+
+
+            foreach ($where as $key => $value) {
+                $qusub .= "and " . $key . "= ?";
+                $parms[] = $value;
+            }
+
+            $query .= substr($qusub, 4);
+        }
+        $sth = self::getPDO()->prepare($query);
+        $sth->execute($parms);
+
+        return $sth->fetch()['count'];
     }
 
     public static function create($db, $table, array $arr)
@@ -165,5 +210,22 @@ class Datenbank extends PDO
             self::getPDO()->rollBack();
             throw new Exception($th->getMessage(), 500);
         }
+    }
+
+    /**
+     * @param int $limit Results per Page
+     * @param int $page Number of the page
+     * @return string
+     */
+    private static final function handleLimit($limit, $page)
+    {
+
+        $offset = $page * $limit - $limit;
+        $str = " LIMIT " . $limit;
+
+        if ($offset) {
+            $str .= " OFFSET " . $offset;
+        }
+        return $str;
     }
 }

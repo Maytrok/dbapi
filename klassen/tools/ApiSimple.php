@@ -9,6 +9,9 @@ class APISimple
 {
     protected $availableMethods = ["_get", "_post", "_patch", "_delete"];
 
+    protected $reservedQueryParams = ['id', 'page', "per_page", "count"];
+    private $proxyGetParams = [];
+
     private $_get, $_post, $_patch, $_delete;
 
 
@@ -103,7 +106,12 @@ class APISimple
             }
         } catch (\Throwable $th) {
             $code = $th->getCode() == 0 ? 500 : $th->getCode();
-            http_response_code($code);
+            if (!is_int($code)) {
+                http_response_code(400);
+            } else {
+
+                http_response_code($code);
+            }
 
             if (App::$DEBUG) {
                 echo json_encode([
@@ -151,6 +159,30 @@ class APISimple
 
         return $in;
     }
+
+    /**
+     * @return array With additional Get Params
+     */
+    protected function getAdditionalGetParams()
+    {
+
+        if (count($this->proxyGetParams) == 0) {
+
+            foreach ($_GET as $key => $value) {
+
+                //Ignore id
+                if (in_array($key, $this->reservedQueryParams)) {
+                    continue;
+                }
+
+
+                $this->proxyGetParams[$key] =  $value;
+            }
+        }
+
+        return $this->proxyGetParams;
+    }
+
 
     public function getAllowedMethods()
     {

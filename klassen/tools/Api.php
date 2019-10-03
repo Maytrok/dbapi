@@ -22,11 +22,39 @@ class Api extends APISimple
 
     protected function get()
     {
+
+
         // Single
         if (isset($_GET['id'])) {
             echo json_encode(Datenbank::get($this->model::getDB(), $this->model::getTableName(), $_GET['id']));
+        } else if (count($this->getAdditionalGetParams()) != 0) {
+            // Specific querys
+
+            if ($pagination = $this->isPageination()) {
+
+                list($page, $per_page) = $pagination;
+                $this->handleMultipleResults(Datenbank::where($this->model::getDB(), $this->model::getTableName(), $this->getAdditionalGetParams(), $per_page, $page));
+            } else {
+                if ($this->isCountRequest()) {
+                    echo json_encode(['count' => Datenbank::countResults($this->model::getDB(), $this->model::getTableName(), $this->getAdditionalGetParams())]);
+                } else {
+
+                    $this->handleMultipleResults(Datenbank::where($this->model::getDB(), $this->model::getTableName(), $this->getAdditionalGetParams()));
+                }
+            }
         } else {
-            echo json_encode(Datenbank::getAll($this->model::getDB(), $this->model::getTableName()));
+            if ($pagination = $this->isPageination()) {
+                list($page, $per_page) = $pagination;
+                $this->handleMultipleResults(Datenbank::getAll($this->model::getDB(), $this->model::getTableName(), $per_page, $page));
+            } else {
+
+                if ($this->isCountRequest()) {
+                    echo json_encode(['count' => Datenbank::countResults($this->model::getDB(), $this->model::getTableName())]);
+                } else {
+
+                    $this->handleMultipleResults(Datenbank::getAll($this->model::getDB(), $this->model::getTableName()));
+                }
+            }
         }
     }
 
@@ -177,5 +205,29 @@ class Api extends APISimple
         }
 
         array_splice($this->availableMethods, array_search($method, $this->availableMethods), 1);
+    }
+
+    private function handleMultipleResults($res)
+    {
+        if (count($res) == 0) {
+            throw new Exception("No matching resources found", 404);
+        }
+        echo json_encode($res);
+    }
+
+    protected function isPageination()
+    {
+
+        if (key_exists('page', $_GET) && key_exists("per_page", $_GET)) {
+
+            return [$_GET['page'], $_GET['per_page']];
+        } else {
+            return false;
+        }
+    }
+
+    protected function isCountRequest()
+    {
+        return key_exists("count", $_GET);
     }
 }
