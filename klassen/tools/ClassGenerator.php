@@ -105,9 +105,21 @@ use Vendor\Dbapi\Interfaces\ModelProps;";
 
 
     $path = $this->config['abstract'] ? $this->config['path'] . "basic/" . ucfirst($this->tbname) . "Basic" : $this->config['path'] . ucfirst($this->tbname);
+
+    $this->createPath($path);
+
     $handle = fopen($path . ".php", $this->config['abstract'] ? 'w' : 'x');
     fwrite($handle, $this->body);
     fclose($handle);
+  }
+
+  private function createPath()
+  {
+    if (!is_dir($this->config['path'])) {
+      if (!mkdir($this->config['path'])) {
+        throw new Exception("Der Pfad " . $this->config['path'] . " konnte nicht erstellt werden. Sind schreibrechte vorhanden?");
+      }
+    }
   }
 
   private function exctractId($fields)
