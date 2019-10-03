@@ -122,7 +122,7 @@ abstract class ModelBasic
      * @throws Exception
      * @return array
      */
-    public static function where($params)
+    public function where($params)
     {
 
         if (!$result = Datenbank::where($this::getDB(), $this::getTableName(), $params)) {
@@ -132,6 +132,15 @@ abstract class ModelBasic
         if (count($result) == 0) {
             throw new Exception("Ressources not found", 404);
         }
-        return $result;
+
+
+        if (count($result) > 1) {
+            throw new Exception("To Many Result for the Where Request", 413);
+        }
+
+
+        $this->setProperties($result[0]);
+
+        return $this->initSuccess = true;
     }
 }
