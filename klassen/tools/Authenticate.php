@@ -3,13 +3,14 @@
 namespace Vendor\Dbapi\Klassen\Tools;
 
 use Firebase\JWT\JWT;
+use Exception;
 use Vendor\Dbapi\Klassen\Datenbank\ModelBasic;
 use Vendor\Dbapi\Interfaces\RestrictedView;
 
 abstract class Authenticate extends ModelBasic
 {
 
-    private $jwt = null;
+    protected $jwt = null;
 
     abstract protected function getJWTKeySecret();
     abstract public function getPasswort();
@@ -28,13 +29,14 @@ abstract class Authenticate extends ModelBasic
         $dec = JWT::decode(getallheaders()["JWT"], $this->getJWTKeySecret(), array('HS256'));
         $this->get($dec->userid);
 
-        if ($jwt != $this->jwt) {
+        if ($jwt != $this->getJwt()) {
             throw new Exception($session_error, 403);
         }
 
         if ($model != null && $model instanceof RestrictedView) {
             $key = $model->restrictedKey();
             $_GET[$key] = $this->getId();
+            $_POST[$key] = $this->getId();
             $key = "set" . ucfirst($key);
             $model->$key = $this->getId();
         }
