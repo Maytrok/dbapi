@@ -6,6 +6,7 @@ use Exception;
 use Vendor\Dbapi\Klassen\Datenbank\ModelBasic;
 use Vendor\Dbapi\Klassen\Datenbank\Datenbank;
 use Vendor\Dbapi\Interfaces\ModelProps;
+use Vendor\Dbapi\Interfaces\RestrictedView;
 
 class Api extends APISimple
 {
@@ -15,9 +16,12 @@ class Api extends APISimple
      */
     private  $model;
 
-    public function __construct(ModelBasic $_model)
+    private $authvalue;
+
+    public function __construct(ModelBasic $_model, $authvalue = null)
     {
         $this->model = $_model;
+        $this->authvalue = $authvalue;
     }
 
     protected function get()
@@ -26,19 +30,32 @@ class Api extends APISimple
 
         // Single
         if (isset($_GET['id'])) {
-            echo json_encode(Datenbank::get($this->model::getDB(), $this->model::getTableName(), $_GET['id']));
+
+            if ($this->authvalue != null && $this->model instanceof RestrictedView) {
+                $this->model->get($_GET['id']);
+                if ($this->model->restrictedValue() != $this->authvalue) {
+                    throw new Exception("Not authorized", 403);
+                } else {
+                    Datenbank::$throwExceptionOnNotFound = true;
+                    echo json_encode(Datenbank::get($this->model::getDB(), $this->model::getTableName(), $_GET['id']));
+                }
+            } else {
+                Datenbank::$throwExceptionOnNotFound = true;
+                echo json_encode(Datenbank::get($this->model::getDB(), $this->model::getTableName(), $_GET['id']));
+                exit();
+            }
         } else if (count($this->getAdditionalGetParams()) != 0) {
             // Specific querys
 
             if ($pagination = $this->isPageination()) {
 
                 list($page, $per_page) = $pagination;
+
                 $this->handleMultipleResults(Datenbank::where($this->model::getDB(), $this->model::getTableName(), $this->getAdditionalGetParams(), $per_page, $page));
             } else {
                 if ($this->isCountRequest()) {
                     echo json_encode(['count' => Datenbank::countResults($this->model::getDB(), $this->model::getTableName(), $this->getAdditionalGetParams())]);
                 } else {
-
                     $this->handleMultipleResults(Datenbank::where($this->model::getDB(), $this->model::getTableName(), $this->getAdditionalGetParams()));
                 }
             }
@@ -73,6 +90,8 @@ class Api extends APISimple
         $in = $this->getParamBody();
         $id = $this->getRequestID();
         $this->initModel($id);
+        $this->checkAuth();
+
         $this->model->setProperties($in);
         $this->saveModel();
         return;
@@ -82,6 +101,7 @@ class Api extends APISimple
     {
         $id = $this->getRequestID();
         $this->initModel($id);
+        $this->checkAuth();
         $this->model->delete();
 
         echo json_encode(["erfolg" => true]);
@@ -212,7 +232,15 @@ class Api extends APISimple
         if (count($res) == 0) {
             throw new Exception("No matching resources found", 404);
         }
-        echo json_encode($res);
+
+        // Restriction
+
+        if ($this->model instanceof RestrictedView && $this->authvalue != null) {
+            echo json_encode($res);
+        } else {
+
+            echo json_encode($res);
+        }
     }
 
     protected function isPageination()
@@ -229,5 +257,18 @@ class Api extends APISimple
     protected function isCountRequest()
     {
         return key_exists("count", $_GET);
+    }
+
+    /**
+     * @throws Exception
+     */
+    protected function checkAuth()
+    {
+        if ($this->model instanceof RestrictedView && $this->authvalue != null) {
+
+            if ($this->model->restrictedValue() != $this->authvalue) {
+                throw new Exception("Not authorized", 403);
+            }
+        }
     }
 }

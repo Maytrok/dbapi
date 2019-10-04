@@ -31,8 +31,9 @@ class APISimple
         if (!$this->_post)
             throw new Exception("Request Method not Allowed", 405);
 
-        $this->checkRequiredParams("post", $_POST);
-        call_user_func($this->_post);
+        $params = array_merge($_POST, $this->getParamBody());
+        $this->checkRequiredParams("post", $params);
+        call_user_func($this->_post, $params);
     }
     protected function patch()
     {
@@ -137,7 +138,7 @@ class APISimple
         header('Content-Type: application/json');
     }
 
-    protected function getParamBody()
+    public function getParamBody()
     {
         return $this->parse(file_get_contents("php://input"));
     }
@@ -149,7 +150,7 @@ class APISimple
      * @return array
      * @throws Exception
      */
-    protected function parse($string)
+    public function parse($string)
     {
 
         if (strlen($string) == 0) {
@@ -183,7 +184,6 @@ class APISimple
     {
 
         if (count($this->proxyGetParams) == 0) {
-
             foreach ($_GET as $key => $value) {
 
                 //Ignore id
@@ -261,7 +261,10 @@ class APISimple
     public static final function handleOptionCall()
     {
         if ($_SERVER['REQUEST_METHOD'] == "OPTIONS") {
-            $this->options();
+            header("Access-Control-Allow-Headers: content-type");
+            header("access-control-allow-methods: GET,POST,DELETE,PATCH");
+            header("access-control-allow-origin: " . getallheaders()['Host']);
+            header("access-control-allow-credentials: true");
             exit();
         }
     }
