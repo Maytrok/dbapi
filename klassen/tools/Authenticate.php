@@ -12,6 +12,8 @@ abstract class Authenticate extends ModelBasic
 
     protected $jwt = null;
 
+    private static $id = null;
+
     abstract protected function getJWTKeySecret();
     abstract public function getPasswort();
 
@@ -28,7 +30,7 @@ abstract class Authenticate extends ModelBasic
 
         $dec = JWT::decode(getallheaders()["JWT"], $this->getJWTKeySecret(), array('HS256'));
         $this->get($dec->userid);
-
+        self::$id = $this->getId();
         if ($jwt != $this->getJwt()) {
             throw new Exception($session_error, 403);
         }
@@ -86,5 +88,10 @@ abstract class Authenticate extends ModelBasic
     public function getJwt()
     {
         return $this->jwt;
+    }
+
+    public static function getAuthUserId()
+    {
+        return self::$id;
     }
 }
