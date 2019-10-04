@@ -18,6 +18,8 @@ class Api extends APISimple
 
     private $authvalue;
 
+    private $_hook_output = null, $_hook_checkAuth;
+
     public function __construct(ModelBasic $_model, $authvalue = null)
     {
         $this->model = $_model;
@@ -37,11 +39,11 @@ class Api extends APISimple
                     throw new Exception("Not authorized", 403);
                 } else {
                     Datenbank::$throwExceptionOnNotFound = true;
-                    echo json_encode(Datenbank::get($this->model::getDB(), $this->model::getTableName(), $_GET['id']));
+                    $this->output(Datenbank::get($this->model::getDB(), $this->model::getTableName(), $_GET['id']));
                 }
             } else {
                 Datenbank::$throwExceptionOnNotFound = true;
-                echo json_encode(Datenbank::get($this->model::getDB(), $this->model::getTableName(), $_GET['id']));
+                $this->output(Datenbank::get($this->model::getDB(), $this->model::getTableName(), $_GET['id']));
                 exit();
             }
         } else if (count($this->getAdditionalGetParams()) != 0) {
@@ -54,7 +56,7 @@ class Api extends APISimple
                 $this->handleMultipleResults(Datenbank::where($this->model::getDB(), $this->model::getTableName(), $this->getAdditionalGetParams(), $per_page, $page));
             } else {
                 if ($this->isCountRequest()) {
-                    echo json_encode(['count' => Datenbank::countResults($this->model::getDB(), $this->model::getTableName(), $this->getAdditionalGetParams())]);
+                    $this->output(['count' => Datenbank::countResults($this->model::getDB(), $this->model::getTableName(), $this->getAdditionalGetParams())]);
                 } else {
                     $this->handleMultipleResults(Datenbank::where($this->model::getDB(), $this->model::getTableName(), $this->getAdditionalGetParams()));
                 }
@@ -66,7 +68,7 @@ class Api extends APISimple
             } else {
 
                 if ($this->isCountRequest()) {
-                    echo json_encode(['count' => Datenbank::countResults($this->model::getDB(), $this->model::getTableName())]);
+                    $this->output(['count' => Datenbank::countResults($this->model::getDB(), $this->model::getTableName())]);
                 } else {
 
                     $this->handleMultipleResults(Datenbank::getAll($this->model::getDB(), $this->model::getTableName()));
@@ -80,7 +82,9 @@ class Api extends APISimple
         $in = array_merge($_POST, $this->getParamBody());
         $this->checkParams($in);
         $this->model->setProperties($in);
+        $this->checkAuth();
         $this->saveModel(201);
+
 
         return;
     }
@@ -104,7 +108,7 @@ class Api extends APISimple
         $this->checkAuth();
         $this->model->delete();
 
-        echo json_encode(["erfolg" => true]);
+        $this->output(["erfolg" => true, "id" => $this->model->getId()]);
 
         return;
     }
@@ -141,7 +145,7 @@ class Api extends APISimple
                 http_response_code(201);
             };
             $res = Datenbank::get($this->model::getDB(), $this->model::getTableName(), $this->model->getId());
-            echo json_encode($res);
+            $this->output($res);
             return true;
         } else {
             return false;
@@ -236,10 +240,10 @@ class Api extends APISimple
         // Restriction
 
         if ($this->model instanceof RestrictedView && $this->authvalue != null) {
-            echo json_encode($res);
+            $this->output($res);
         } else {
 
-            echo json_encode($res);
+            $this->output($res);
         }
     }
 
@@ -264,11 +268,46 @@ class Api extends APISimple
      */
     protected function checkAuth()
     {
-        if ($this->model instanceof RestrictedView && $this->authvalue != null) {
+        if ($this->_hook_checkAuth != null) {
+            call_user_func($this->_hook_checkAuth, $this->model, $_SERVER['REQUEST_METHOD']);
+        }
 
-            if ($this->model->restrictedValue() != $this->authvalue) {
-                throw new Exception("Not authorized", 403);
+        if ($_SERVER['REQUEST_METHOD'] != "POST") {
+
+            if ($this->model instanceof RestrictedView && $this->authvalue != null) {
+
+                if ($this->model->restrictedValue() != $this->authvalue) {
+                    throw new Exception("Not authorized", 403);
+                }
             }
+        }
+    }
+
+
+    public function hookOutput($fnc)
+    {
+        if (!is_callable($fnc)) {
+            throw new Exception("Parameter has to be an Funktion", 500);
+        }
+        $this->_hook_output = $fnc;
+    }
+
+    public function hookAuth($fnc)
+    {
+        if (!is_callable($fnc)) {
+            throw new Exception("Parameter has to be an Funktion", 500);
+        }
+        $this->_hook_checkAuth = $fnc;
+    }
+
+    protected function output($result)
+    {
+        if ($this->_hook_output != null) {
+            $result = call_user_func($this->_hook_output, $result, $_SERVER['REQUEST_METHOD']);
+        }
+
+        if ($result !== false && is_array($result)) {
+            echo json_encode($result);
         }
     }
 }
