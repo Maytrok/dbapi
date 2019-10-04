@@ -77,7 +77,7 @@ class Api extends APISimple
 
     protected function post()
     {
-        $in = in_array(getallheaders()['Content-Type'], ["application/json", "application/json;charset=utf-8"])  ? $this->getParamBody() : $_POST;
+        $in = array_merge($_POST, $this->getParamBody());
         $this->checkParams($in);
         $this->model->setProperties($in);
         $this->saveModel(201);
