@@ -103,14 +103,18 @@ use Vendor\Dbapi\Interfaces\ModelProps;";
     $this->body .= "
 }";
 
+    if ($this->config['path'] === false) {
+      echo substr($this->body, 1);
+    } else {
 
-    $path = $this->config['abstract'] ? $this->config['path'] . "basic/" . ucfirst($this->tbname) . "Basic" : $this->config['path'] . ucfirst($this->tbname);
+      $path = $this->config['abstract'] ? $this->config['path'] . "basic/" . ucfirst($this->tbname) . "Basic" : $this->config['path'] . ucfirst($this->tbname);
 
-    $this->createPath($path);
+      $this->createPath($path);
 
-    $handle = fopen($path . ".php", $this->config['abstract'] ? 'w' : 'x');
-    fwrite($handle, $this->body);
-    fclose($handle);
+      $handle = fopen($path . ".php", $this->config['abstract'] ? 'w' : 'x');
+      fwrite($handle, $this->body);
+      fclose($handle);
+    }
   }
 
   private function createPath()
