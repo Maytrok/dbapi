@@ -1,3 +1,3 @@
-Simple Database connetion with REST API
+Simple Database connection with REST API
 
 Please ignore
