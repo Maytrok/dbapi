@@ -1,6 +1,6 @@
 <?php
 
-namespace Vendor\Dbapi\Interfaces;
+namespace dbapi\interfaces;
 
 /**
  * public function restrictedKey()

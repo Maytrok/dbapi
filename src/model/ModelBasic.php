@@ -1,10 +1,11 @@
 <?php
 
-namespace Vendor\Dbapi\Klassen\Datenbank;
+namespace dbapi\model;
 
 
 use Exception;
-use Vendor\Dbapi\Interfaces\ModelProps;
+use dbapi\interfaces\ModelProps;
+use dbapi\db\Database;
 
 /**
  * public static function getTableName();
@@ -52,7 +53,7 @@ abstract class ModelBasic
     public function get($id)
     {
 
-        if (!$result = Datenbank::get($this::getDB(), $this::getTableName(), $id)) {
+        if (!$result = Database::get($this::getDB(), $this::getTableName(), $id)) {
             throw new Exception($this->noRessourceFound(), 404);
         }
 
@@ -77,20 +78,20 @@ abstract class ModelBasic
         if ($this->id != 0) {
             // Update
 
-            return Datenbank::update($this::getDB(), $this::getTableName(), $this->getPropsArray(), $this->id);
+            return Database::update($this::getDB(), $this::getTableName(), $this->getPropsArray(), $this->id);
         } else {
 
             // Alles gesetzt
             $this->isAllSet();
 
-            return $this->id  = Datenbank::create($this::getDB(), $this::getTableName(), $this->getPropsArray());;
+            return $this->id  = Database::create($this::getDB(), $this::getTableName(), $this->getPropsArray());;
         }
     }
 
     public function delete()
     {
 
-        return Datenbank::delete($this::getDB(), $this::getTableName(), $this->id);
+        return Database::delete($this::getDB(), $this::getTableName(), $this->id);
     }
 
 
@@ -124,7 +125,7 @@ abstract class ModelBasic
      */
     public function where($params)
     {
-        $result = Datenbank::where($this::getDB(), $this::getTableName(), $params);
+        $result = Database::where($this::getDB(), $this::getTableName(), $params);
 
         if (count($result) == 0) {
             throw new Exception($this->noRessourceFound(), 404);

@@ -1,11 +1,11 @@
 <?php
 
-namespace Vendor\Dbapi\Klassen\Tools;
+namespace dbapi\tools;
 
 use Firebase\JWT\JWT;
 use Exception;
-use Vendor\Dbapi\Klassen\Datenbank\ModelBasic;
-use Vendor\Dbapi\Interfaces\RestrictedView;
+use dbapi\model\ModelBasic;
+use dbapi\interfaces\RestrictedView;
 
 abstract class Authenticate extends ModelBasic
 {

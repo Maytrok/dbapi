@@ -1,8 +1,8 @@
 <?php
 
-namespace Vendor\Dbapi\Klassen\Tools;
+namespace dbapi\tools;
 
-use Vendor\Dbapi\Klassen\Datenbank\Datenbank;
+use dbapi\db\Database;
 use PDO;
 use Exception;
 
@@ -22,7 +22,7 @@ class ClassGenerator
     $this->tbname = $tablename;
     $this->db = $db;
 
-    $pdo = Datenbank::getPDO();
+    $pdo = Database::getPDO();
 
     $sth = $pdo->prepare("DESCRIBE " . $db . "." . $tablename);
     $sth->execute();
@@ -33,20 +33,20 @@ class ClassGenerator
             
 namespace php\klassen\basic;
       
-use Vendor\Dbapi\Klassen\Datenbank\ModelBasic;";
+use dbapi\model\ModelBasic;";
     } else {
       $this->body = "<?php
             
 namespace php\klassen;
       
-use Vendor\Dbapi\Klassen\Datenbank\ModelBasic;";
+use dbapi\model\ModelBasic;";
     }
 
 
 
     if ($this->config['interface']) {
       $this->body .= "
-use Vendor\Dbapi\Interfaces\ModelProps;";
+use dbapi\interfaces\ModelProps;";
     }
 
     $this->body .= "
@@ -121,7 +121,7 @@ use Vendor\Dbapi\Interfaces\ModelProps;";
   {
     if (!is_dir($this->config['path'])) {
       if (!mkdir($this->config['path'])) {
-        throw new Exception("Der Pfad " . $this->config['path'] . " konnte nicht erstellt werden. Sind schreibrechte vorhanden?");
+        throw new Exception("The Path " . $this->config['path'] . " could not be created . Are write rights available?");
       }
     }
   }
@@ -139,7 +139,7 @@ use Vendor\Dbapi\Interfaces\ModelProps;";
     }
 
     if (!$found) {
-      throw new Exception("Um die Funktion nutzen zu koennen benoetigt die Tabelle einen ID Schluessel");
+      throw new Exception("ID key is required");
     }
     return $fields;
   }

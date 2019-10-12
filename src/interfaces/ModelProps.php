@@ -1,6 +1,6 @@
 <?php
 
-namespace Vendor\Dbapi\Interfaces;
+namespace dbapi\interfaces;
 
 /**
  * Kann verwendet werden, wenn nicht alle Properties fuer das Speichern in die Datenbank benoetigt werden

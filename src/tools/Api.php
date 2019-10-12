@@ -1,12 +1,12 @@
 <?php
 
-namespace Vendor\Dbapi\Klassen\Tools;
+namespace dbapi\tools;
 
 use Exception;
-use Vendor\Dbapi\Klassen\Datenbank\ModelBasic;
-use Vendor\Dbapi\Klassen\Datenbank\Datenbank;
-use Vendor\Dbapi\Interfaces\ModelProps;
-use Vendor\Dbapi\Interfaces\RestrictedView;
+use dbapi\model\ModelBasic;
+use dbapi\db\Database;
+use dbapi\interfaces\ModelProps;
+use dbapi\interfaces\RestrictedView;
 
 class Api extends APISimple
 {
@@ -38,12 +38,12 @@ class Api extends APISimple
                 if ($this->model->restrictedValue() != $this->authvalue) {
                     throw new Exception("Not authorized", 403);
                 } else {
-                    Datenbank::$throwExceptionOnNotFound = true;
-                    $this->output(Datenbank::get($this->model::getDB(), $this->model::getTableName(), $_GET['id']));
+                    Database::$throwExceptionOnNotFound = true;
+                    $this->output(Database::get($this->model::getDB(), $this->model::getTableName(), $_GET['id']));
                 }
             } else {
-                Datenbank::$throwExceptionOnNotFound = true;
-                $this->output(Datenbank::get($this->model::getDB(), $this->model::getTableName(), $_GET['id']));
+                Database::$throwExceptionOnNotFound = true;
+                $this->output(Database::get($this->model::getDB(), $this->model::getTableName(), $_GET['id']));
                 exit();
             }
         } else if (count($this->getAdditionalGetParams()) != 0) {
@@ -53,25 +53,25 @@ class Api extends APISimple
 
                 list($page, $per_page) = $pagination;
 
-                $this->handleMultipleResults(Datenbank::where($this->model::getDB(), $this->model::getTableName(), $this->getAdditionalGetParams(), $per_page, $page));
+                $this->handleMultipleResults(Database::where($this->model::getDB(), $this->model::getTableName(), $this->getAdditionalGetParams(), $per_page, $page));
             } else {
                 if ($this->isCountRequest()) {
-                    $this->output(['count' => Datenbank::countResults($this->model::getDB(), $this->model::getTableName(), $this->getAdditionalGetParams())]);
+                    $this->output(['count' => Database::countResults($this->model::getDB(), $this->model::getTableName(), $this->getAdditionalGetParams())]);
                 } else {
-                    $this->handleMultipleResults(Datenbank::where($this->model::getDB(), $this->model::getTableName(), $this->getAdditionalGetParams()));
+                    $this->handleMultipleResults(Database::where($this->model::getDB(), $this->model::getTableName(), $this->getAdditionalGetParams()));
                 }
             }
         } else {
             if ($pagination = $this->isPageination()) {
                 list($page, $per_page) = $pagination;
-                $this->handleMultipleResults(Datenbank::getAll($this->model::getDB(), $this->model::getTableName(), $per_page, $page));
+                $this->handleMultipleResults(Database::getAll($this->model::getDB(), $this->model::getTableName(), $per_page, $page));
             } else {
 
                 if ($this->isCountRequest()) {
-                    $this->output(['count' => Datenbank::countResults($this->model::getDB(), $this->model::getTableName())]);
+                    $this->output(['count' => Database::countResults($this->model::getDB(), $this->model::getTableName())]);
                 } else {
 
-                    $this->handleMultipleResults(Datenbank::getAll($this->model::getDB(), $this->model::getTableName()));
+                    $this->handleMultipleResults(Database::getAll($this->model::getDB(), $this->model::getTableName()));
                 }
             }
         }
@@ -144,7 +144,7 @@ class Api extends APISimple
             if ($statuscode != 200) {
                 http_response_code(201);
             };
-            $res = Datenbank::get($this->model::getDB(), $this->model::getTableName(), $this->model->getId());
+            $res = Database::get($this->model::getDB(), $this->model::getTableName(), $this->model->getId());
             $this->output($res);
             return true;
         } else {

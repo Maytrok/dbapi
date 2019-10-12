@@ -1,6 +1,6 @@
 <?php
 
-namespace Vendor\Dbapi\Klassen\Tools;
+namespace dbapi\tools;
 
 use Exception;
 
@@ -17,12 +17,12 @@ class EnvReader
         $fp = $filepath ? $filepath : $this->filepath;
 
         if (!file_exists($fp)) {
-            throw new Exception("Die .Env konnte nicht gefunden werden!");
+            throw new Exception(".Env not found!");
         }
         @$handle = fopen($fp, "r");
 
         if (!$handle) {
-            throw new Exception("Es ist ein fehler beim oeffnen der .Env aufgetreten");
+            throw new Exception(".Env could not be opened");
         }
 
         while ($row = fgets($handle, 2000)) {

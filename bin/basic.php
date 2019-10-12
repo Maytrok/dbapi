@@ -4,7 +4,11 @@ spl_autoload_register('my_autoloader');
 function my_autoloader($class)
 {
     $class = str_replace("\\", "/", $class);
-    include $class . '.php';
+    $path = __DIR__ . "/../src" . str_replace("dbapi", "", $class) . '.php';
+    if (file_exists($path)) {
+
+        include $path;
+    }
 }
 
 function utf8encodeArray($array)

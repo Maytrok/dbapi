@@ -1,10 +1,10 @@
 <?php
 
-namespace Vendor\Dbapi\Klassen\Tools;
+namespace dbapi\tools;
 
 use Exception;
 use Throwable;
-use Vendor\Dbapi\Klassen\Datenbank\Datenbank;
+use dbapi\db\Database;
 
 class APISimple
 {
@@ -249,7 +249,7 @@ class APISimple
         if (App::$DEBUG) {
             echo json_encode([
                 "error" => $th->getMessage(), "trace" => $th->getTrace(),
-                "DB" => Datenbank::getPDO()->errorInfo()
+                "DB" => Database::getPDO()->errorInfo()
             ]);
         } else {
             echo json_encode(["error" => $th->getMessage()]);

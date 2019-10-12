@@ -1,12 +1,12 @@
 <?php
 
-namespace Vendor\Dbapi\Klassen\Datenbank;
+namespace dbapi\db;
 
 use PDO;
 use Exception;
-use Vendor\dbapi\Klassen\Tools\EnvReader;
+use dbapi\tools\EnvReader;
 
-class Datenbank extends PDO
+class Database extends PDO
 {
 
     private static $connection = null;
