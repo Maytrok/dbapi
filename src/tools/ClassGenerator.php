@@ -96,7 +96,7 @@ use dbapi\interfaces\ModelProps;";
       $this->setter($fields);
     }
 
-    $this->abstractMethods();
+    $this->abstractMethods($fields);
 
 
 
@@ -157,7 +157,7 @@ use dbapi\interfaces\ModelProps;";
   }
 
 
-  private function abstractMethods()
+  private function abstractMethods($fields)
   {
     $this->body .= "
         
@@ -176,7 +176,7 @@ use dbapi\interfaces\ModelProps;";
         
   public function getProperties()
   {
-    return array_keys(get_class_vars(self::class));   
+    return [\"" . implode("\",\"", $fields) . "\"];
   }";
   }
 
