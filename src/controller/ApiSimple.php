@@ -46,12 +46,8 @@ class APISimple
         if (!$this->_patch)
             throw new Exception("Request Method not Allowed", 405);
         $params = $this->getParamBody();
-
         $this->checkRequiredParams("patch", $params);
-        if (!isset($_GET['id'])) {
-            throw new Exception("GET Param ID was not submitted", 400);
-        }
-        call_user_func($this->_patch, $params, $_GET['id']);
+        call_user_func($this->_patch, $params);
     }
     protected function delete()
     {
@@ -60,11 +56,7 @@ class APISimple
 
         $params = $this->getParamBody();
         $this->checkRequiredParams("delete", $params);
-
-        if (!isset($_GET['id'])) {
-            throw new Exception("GET Param ID was not submitted", 400);
-        }
-        call_user_func($this->_delete, $params, $_GET['id']);
+        call_user_func($this->_delete, $params);
     }
     protected function options()
     {
@@ -245,8 +237,6 @@ class APISimple
                     throw new Exception("Required Param " . $value . " missing", 400);
                 }
             }
-
-            return true;
         } else {
             return true;
         }
