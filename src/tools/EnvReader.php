@@ -14,7 +14,7 @@ class EnvReader
 
     public function __construct($filepath = null)
     {
-        $fp = $filepath ? $filepath : $this->filepath;
+        $fp = $filepath ? $filepath . "/.env" : $this->filepath;
 
         if (!file_exists($fp)) {
             throw new Exception(".Env not found!");
