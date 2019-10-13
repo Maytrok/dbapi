@@ -2,6 +2,7 @@
 
 namespace dbapi\model;
 
+use dbapi\controller\APISimple;
 use dbapi\exception\NoValidSessionException;
 use dbapi\interfaces\Authenticate;
 use Firebase\JWT\JWT;
@@ -16,6 +17,8 @@ abstract class JWTAuthenticate extends ModelBasic implements Authenticate
 
     private static $id = null;
 
+    private static $model = null;
+
     abstract protected function getJWTKeySecret();
     abstract public function getPasswort();
 
@@ -25,7 +28,7 @@ abstract class JWTAuthenticate extends ModelBasic implements Authenticate
         try {
             $session_error = "Keine gültige Sitzung";
             if (!key_exists("JWT", getallheaders())) {
-                throw new NoValidSessionException("Not JWT Header was submitted", 403);
+                throw new NoValidSessionException("No JWT Header was submitted", 403);
             };
             $jwt = getallheaders()["JWT"];
             if (strlen($jwt) == 0) {
@@ -46,11 +49,12 @@ abstract class JWTAuthenticate extends ModelBasic implements Authenticate
                 $_POST[$key] = $this->getId();
                 $key = "set" . ucfirst($key);
                 $model->$key = $this->getId();
+                self::$model = $this;
             }
         } catch (Exception $th) {
 
             http_response_code($th->getCode());
-
+            APISimple::setJSONHeader();
             $classname = explode("\\", get_class($th));
             echo json_encode(['error' => $th->getMessage(), "exception" => $classname[count($classname) - 1]]);
             exit();
@@ -78,6 +82,11 @@ abstract class JWTAuthenticate extends ModelBasic implements Authenticate
             $this->save();
             return ['erfolg' => true, "jwt" => $jwt];
         }
+    }
+
+    public static function getModel()
+    {
+        return self::$model;
     }
 
 

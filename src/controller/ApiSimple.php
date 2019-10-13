@@ -136,7 +136,7 @@ class APISimple
                 default;
                     throw new RequestMethodNotAllowedException();
             }
-        } catch (\Throwable $th) {
+        } catch (\Exception $th) {
             self::handleError($th);
         }
     }
