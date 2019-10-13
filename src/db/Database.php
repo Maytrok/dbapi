@@ -19,6 +19,16 @@ class Database extends PDO
         self::$connection = new PDO("mysql:host=" . $server . ";charset=utf8", $user,  $password, $opt);
     }
 
+    public static function open($reader)
+    {
+        $env = $reader == null ? new EnvReader() : $reader;
+        $user = $env->env['USER'];
+        $password = $env->env['PASSWORD'];
+        $server = $env->env['SERVER'];
+        $opt = [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC];
+        self::$connection = new PDO("mysql:host=" . $server . ";charset=utf8", $user,  $password, $opt);
+    }
+
     /**
      * @param EnvReader $reader
      * @return PDO
@@ -27,13 +37,7 @@ class Database extends PDO
     {
 
         if (!self::$connection) {
-
-            $env = $reader == null ? new EnvReader() : $reader;
-            $user = $env->env['USER'];
-            $password = $env->env['PASSWORD'];
-            $server = $env->env['SERVER'];
-            $opt = [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC];
-            self::$connection = new PDO("mysql:host=" . $server . ";charset=utf8", $user,  $password, $opt);
+            self::open($reader);
         }
 
         return self::$connection;
