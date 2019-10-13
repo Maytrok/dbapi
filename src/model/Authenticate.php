@@ -1,6 +1,6 @@
 <?php
 
-namespace dbapi\tools;
+namespace dbapi\model;
 
 use Firebase\JWT\JWT;
 use Exception;

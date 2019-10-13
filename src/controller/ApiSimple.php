@@ -1,6 +1,6 @@
 <?php
 
-namespace dbapi\tools;
+namespace dbapi\controller;
 
 use Exception;
 use Throwable;
