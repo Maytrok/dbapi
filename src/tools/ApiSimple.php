@@ -16,6 +16,11 @@ class APISimple
     private $_get, $_post, $_patch, $_delete;
     protected $requiredParams = [];
 
+    public static $DELETE = "_delete";
+    public static $POST = "_post";
+    public static $PATCH = "_patch";
+    public static $GET = "_get";
+
 
     protected function get()
     {
