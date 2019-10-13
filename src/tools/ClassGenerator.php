@@ -11,7 +11,7 @@ class ClassGenerator
 
   private $tbname, $db, $body = "";
 
-  private $config = ["abstract" => true, "path" => "./php/klassen/", "getter" => true, "setter" => true, "interface" => false];
+  private $config = ["abstract" => true, "path" => "./php/klassen/", "getter" => true, "setter" => true, "interface" => true];
 
 
   public function __construct($tablename, $db, $config = [])
@@ -124,6 +124,14 @@ use dbapi\interfaces\ModelProps;";
         throw new Exception("The Path " . $this->config['path'] . " could not be created . Are write rights available?");
       }
     }
+
+    if ($this->config['abstract']) {
+      if (!is_dir($this->config['path'] . "basic/")) {
+        if (!mkdir($this->config['path'] . "basic/")) {
+          throw new Exception("The Path " . $this->config['path'] . " could not be created . Are write rights available?");
+        }
+      }
+    }
   }
 
   private function exctractId($fields)
@@ -145,13 +153,25 @@ use dbapi\interfaces\ModelProps;";
   }
 
 
-  private function requiredProps($fields)
+  private function requiredProps()
   {
 
     $this->body .= "
   public function requiredProps()
-  {
-    return [\"" . implode("\",\"", $fields) . "\"];
+  {";
+
+    $ar = [];
+    foreach (Database::getPDO()->query("DESCRIBE " . $this->db . "." . $this->tbname) as $value) {
+
+      if ($value['Default'] == null) {
+
+        if ($value["Field"] == "id") {
+          continue;
+        }
+        $ar[] = $value["Field"];
+      }
+    }
+    $this->body .= "return [\"" . implode("\",\"", $ar) . "\"];
 
   }";
   }
