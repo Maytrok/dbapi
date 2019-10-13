@@ -29,7 +29,7 @@ class Api extends APISimple
     protected function get()
     {
 
-
+        $this->isMethodAllowed("get");
         // Single
         if (isset($_GET['id'])) {
 
@@ -79,6 +79,7 @@ class Api extends APISimple
 
     protected function post()
     {
+        $this->isMethodAllowed("post");
         $in = array_merge($_POST, $this->getParamBody());
         $this->checkParams($in);
         $this->model->setProperties($in);
@@ -91,6 +92,7 @@ class Api extends APISimple
 
     protected function patch()
     {
+        $this->isMethodAllowed("patch");
         $in = $this->getParamBody();
         $id = $this->getRequestID();
         $this->initModel($id);
@@ -103,6 +105,8 @@ class Api extends APISimple
 
     protected function delete()
     {
+
+        $this->isMethodAllowed("delete");
         $id = $this->getRequestID();
         $this->initModel($id);
         $this->checkAuth();
@@ -227,7 +231,6 @@ class Api extends APISimple
         if (!in_array($method, $this->availableMethods)) {
             throw new Exception("Methode is not included in the Array. Please make sure you add a '_' before the Method name", 1);
         }
-
         array_splice($this->availableMethods, array_search($method, $this->availableMethods), 1);
     }
 
@@ -308,6 +311,13 @@ class Api extends APISimple
 
         if ($result !== false && is_array($result)) {
             echo json_encode($result);
+        }
+    }
+
+    protected function isMethodAllowed($method)
+    {
+        if (!in_array("_" . strtolower($method), $this->availableMethods)) {
+            throw new Exception("Request Method not Allowed", 405);
         }
     }
 }
