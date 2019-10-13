@@ -29,7 +29,7 @@ class APISimple
             throw new Exception("Request Method not Allowed", 405);
 
         $this->checkRequiredParams("get", $_GET);
-        call_user_func($this->_get, $_GET);
+        call_user_func($this->_get);
     }
 
     protected function post()
