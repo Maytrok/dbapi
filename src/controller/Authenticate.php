@@ -2,6 +2,7 @@
 
 namespace dbapi\controller;
 
+use dbapi\exception\NotAuthorizedException;
 use Exception;
 use dbapi\interfaces\Authenticate as DbapiAuthenticate;
 
@@ -15,7 +16,7 @@ class Authenticate extends APISimple
     {
 
         if (!$model instanceof DbapiAuthenticate) {
-            throw new Exception("Model in Authenticate needed to be an instance of Authenticate Model", 1);
+            throw new Exception("Model in Authenticate needed to be an instance of Authenticate Model", 500);
         }
         $this->model = $model;
 
@@ -29,7 +30,7 @@ class Authenticate extends APISimple
             if (false !== $res) {
                 echo json_encode($res);
             } else {
-                throw new Exception("User unknown or Password is wrong", 403);
+                throw new NotAuthorizedException("User unknown or Password is wrong");
             }
         }, ['user', "password"]);
     }
@@ -39,7 +40,7 @@ class Authenticate extends APISimple
         if ($this->model->logout()) {
             echo json_encode(['erfolg' => true]);
         } else {
-            throw new Exception("Error on Logout", 400);
+            throw new Exception("Error on Logout", 500);
         }
     }
 

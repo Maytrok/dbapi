@@ -5,6 +5,8 @@ namespace dbapi\controller;
 use Exception;
 use Throwable;
 use dbapi\db\Database;
+use dbapi\exception\BadRequestException;
+use dbapi\exception\RequestMethodNotAllowedException;
 use dbapi\tools\App;
 
 class APISimple
@@ -26,7 +28,7 @@ class APISimple
     protected function get()
     {
         if (!$this->_get)
-            throw new Exception("Request Method not Allowed", 405);
+            throw new RequestMethodNotAllowedException();
 
         $this->checkRequiredParams("get", $_GET);
         call_user_func($this->_get);
@@ -35,7 +37,7 @@ class APISimple
     protected function post()
     {
         if (!$this->_post)
-            throw new Exception("Request Method not Allowed", 405);
+            throw new RequestMethodNotAllowedException();
 
         $params = array_merge($_POST, $this->getParamBody());
         $this->checkRequiredParams("post", $params);
@@ -44,7 +46,7 @@ class APISimple
     protected function patch()
     {
         if (!$this->_patch)
-            throw new Exception("Request Method not Allowed", 405);
+            throw new RequestMethodNotAllowedException();
         $params = $this->getParamBody();
         $this->checkRequiredParams("patch", $params);
         call_user_func($this->_patch, $params);
@@ -52,7 +54,7 @@ class APISimple
     protected function delete()
     {
         if (!$this->_delete)
-            throw new Exception("Request Method not Allowed", 405);
+            throw new RequestMethodNotAllowedException();
 
         $params = $this->getParamBody();
         $this->checkRequiredParams("delete", $params);
@@ -70,7 +72,7 @@ class APISimple
     {
 
         if (!is_callable($func)) {
-            throw new Exception("Argument must be an function");
+            throw new Exception("Argument must be an function", 500);
         }
         if (count($requiredParams) != 0) {
             $this->requiredParams["get"] = $requiredParams;
@@ -81,7 +83,7 @@ class APISimple
     {
 
         if (!is_callable($func)) {
-            throw new Exception("Argument must be an function");
+            throw new Exception("Argument must be an function", 500);
         }
         if (count($requiredParams) != 0) {
             $this->requiredParams["post"] = $requiredParams;
@@ -92,7 +94,7 @@ class APISimple
     {
 
         if (!is_callable($func)) {
-            throw new Exception("Argument must be an function");
+            throw new Exception("Argument must be an function", 500);
         }
 
         if (count($requiredParams) != 0) {
@@ -104,7 +106,7 @@ class APISimple
     {
 
         if (!is_callable($func)) {
-            throw new Exception("Argument must be an function");
+            throw new Exception("Argument must be an function", 500);
         }
         if (count($requiredParams) != 0) {
             $this->requiredParams["delete"] = $requiredParams;
@@ -132,7 +134,7 @@ class APISimple
                     return $this->options();
 
                 default;
-                    throw new Exception("Request Method not Allowed", 405);
+                    throw new RequestMethodNotAllowedException();
             }
         } catch (\Throwable $th) {
             self::handleError($th);
@@ -160,7 +162,7 @@ class APISimple
     {
 
         if (strlen($string) == 0) {
-            throw new Exception("No Arguments were given", 400);
+            throw new BadRequestException("No Arguments were given");
         }
         if (key_exists('Content-Type', getallheaders())) {
 
@@ -177,7 +179,7 @@ class APISimple
         }
 
         if (!is_array($in)) {
-            throw new Exception("Can not Parse Parameter", 400);
+            throw new BadRequestException("Can not Parse Parameter");
         }
 
         return $in;
@@ -222,6 +224,7 @@ class APISimple
 
     /**
      * Required Params provided
+     * @throws RequestMethodNotAllowedException
      * @param string $method Request Method
      * @param array $array $request array
      * @return bool
@@ -234,7 +237,7 @@ class APISimple
             foreach ($this->requiredParams[$method] as $value) {
 
                 if (!key_exists($value, $array)) {
-                    throw new Exception("Required Param " . $value . " missing", 400);
+                    throw new BadRequestException("Required Param " . $value . " missing");
                 }
             }
         } else {
@@ -242,7 +245,7 @@ class APISimple
         }
     }
 
-    public static function handleError(Throwable $th)
+    public static function handleError(Exception $th)
     {
         $code = $th->getCode() == 0 ? 500 : $th->getCode();
         if (!is_int($code)) {
@@ -252,13 +255,16 @@ class APISimple
             http_response_code($code);
         }
 
+        $classname = explode("\\", get_class($th));
+
         if (App::$DEBUG) {
             echo json_encode([
                 "error" => $th->getMessage(), "trace" => $th->getTrace(),
-                "DB" => Database::getPDO()->errorInfo()
+                "DB" => Database::getPDO()->errorInfo(),
+                "exception" => $classname[count($classname) - 1]
             ]);
         } else {
-            echo json_encode(["error" => $th->getMessage()]);
+            echo json_encode(["error" => $th->getMessage(), "exception" => $classname[count($classname) - 1]]);
 
             exit();
         }

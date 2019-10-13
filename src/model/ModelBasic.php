@@ -6,6 +6,7 @@ namespace dbapi\model;
 use Exception;
 use dbapi\interfaces\ModelProps;
 use dbapi\db\Database;
+use dbapi\exception\NotFoundException;
 
 /**
  * public static function getTableName();
@@ -54,7 +55,7 @@ abstract class ModelBasic
     {
 
         if (!$result = Database::get($this::getDB(), $this::getTableName(), $id)) {
-            throw new Exception($this->noRessourceFound(), 404);
+            throw new NotFoundException($this->noRessourceFound());
         }
 
         foreach ($result as $key => $value) {
@@ -128,7 +129,7 @@ abstract class ModelBasic
         $result = Database::where($this::getDB(), $this::getTableName(), $params);
 
         if (count($result) == 0) {
-            throw new Exception($this->noRessourceFound(), 404);
+            throw new NotFoundException($this->noRessourceFound());
         }
 
 

@@ -2,6 +2,7 @@
 
 namespace dbapi\db;
 
+use dbapi\exception\NotFoundException;
 use PDO;
 use Exception;
 use dbapi\tools\EnvReader;
@@ -55,7 +56,7 @@ class Database extends PDO
         $sth->execute();
         if (self::$throwExceptionOnNotFound) {
             if ($sth->rowCount() == 0) {
-                throw new Exception("Requested item not found", 404);
+                throw new NotFoundException();
             }
         }
         $res = utf8encodeArray($sth->fetch());
@@ -74,7 +75,7 @@ class Database extends PDO
         $sth->execute();
         if (self::$throwExceptionOnNotFound) {
             if ($sth->rowCount() == 0) {
-                throw new Exception("Ressource not found", 404);
+                throw new NotFoundException();
             }
         }
         $res = utf8encodeArray($sth->fetchAll());
@@ -115,7 +116,7 @@ class Database extends PDO
         $sth->execute($parms);
         if (self::$throwExceptionOnNotFound) {
             if ($sth->rowCount() == 0) {
-                throw new Exception("Ressource not found", 404);
+                throw new NotFoundException();
             }
         }
         return $sth->fetchAll();
@@ -218,10 +219,10 @@ class Database extends PDO
             $sth = self::getPDO()->prepare($query);
             $sth->bindValue(":id", $id, PDO::PARAM_INT);
             if (!$sth->execute()) {
-                throw new Exception("Fataler Fehler beim loeschen des Items");
+                throw new Exception("Fatal Error at deleting this item", 500);
             }
             if ($sth->rowCount() != 1) {
-                throw new Exception("Fataler Fehler beim loeschen des Items: Der Count ist ungueltig");
+                throw new Exception("Fatal Error at deleting. To many results", 500);
             }
             self::getPDO()->commit();
             return true;

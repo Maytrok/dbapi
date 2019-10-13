@@ -5,6 +5,9 @@ namespace dbapi\controller;
 use Exception;
 use dbapi\model\ModelBasic;
 use dbapi\db\Database;
+use dbapi\exception\BadRequestException;
+use dbapi\exception\NotAuthorizedException;
+use dbapi\exception\NotFoundException;
 use dbapi\interfaces\ModelProps;
 use dbapi\interfaces\RestrictedView;
 
@@ -34,16 +37,16 @@ class Api extends APISimple
         if (isset($_GET['id'])) {
 
             if ($this->authvalue != null && $this->model instanceof RestrictedView) {
-                $this->model->get($_GET['id']);
+                $this->model->get($this->getRequestID());
                 if ($this->model->restrictedValue() != $this->authvalue) {
-                    throw new Exception("Not authorized", 403);
+                    throw new NotAuthorizedException();
                 } else {
                     Database::$throwExceptionOnNotFound = true;
-                    $this->output(Database::get($this->model::getDB(), $this->model::getTableName(), $_GET['id']));
+                    $this->output(Database::get($this->model::getDB(), $this->model::getTableName(), $this->getRequestID()));
                 }
             } else {
                 Database::$throwExceptionOnNotFound = true;
-                $this->output(Database::get($this->model::getDB(), $this->model::getTableName(), $_GET['id']));
+                $this->output(Database::get($this->model::getDB(), $this->model::getTableName(), $this->getRequestID()));
                 exit();
             }
         } else if (count($this->getAdditionalGetParams()) != 0) {
@@ -120,14 +123,14 @@ class Api extends APISimple
     /**
      * Laed die Instanz
      * @param int $id
-     * @throws Exception Exception
+     * @throws NotFoundException Exception
      */
     private function initModel($id)
     {
         $this->model->get($id);
 
         if (!$this->model->isInitSuccess()) {
-            throw new Exception("Not Found", 404);
+            throw new NotFoundException();
         }
     }
 
@@ -160,7 +163,7 @@ class Api extends APISimple
     /**
      * Wurden bei der Anfrage alle notwendigen Parameter gesetzt
      * @return bool
-     * @throws Exception
+     * @throws BadRequestException
      */
     private function checkParams($input)
     {
@@ -169,7 +172,7 @@ class Api extends APISimple
 
         foreach ($req as $value) {
             if (!in_array($value, array_keys($input))) {
-                throw new Exception("Missing Parameter:" . $value, 400);
+                throw new BadRequestException("Missing Parameter:" . $value);
             }
         }
         return true;
@@ -185,11 +188,11 @@ class Api extends APISimple
         if (isset($_GET['id'])) {
 
             if (!is_numeric($_GET['id'])) {
-                throw new Exception("Malformed ID", 400);
+                throw new BadRequestException("Malformed ID");
             }
             return $_GET['id'];
         } else {
-            throw new Exception("The ID has not been provided", 405);
+            throw new BadRequestException("No ID submitted");
         }
     }
 
@@ -229,7 +232,7 @@ class Api extends APISimple
     private function removeMethodFromArray($method)
     {
         if (!in_array($method, $this->availableMethods)) {
-            throw new Exception("Methode is not included in the Array. Please make sure you add a '_' before the Method name", 1);
+            throw new Exception("Methode is not included in the Array. Please make sure you add a '_' before the Method name", 500);
         }
         array_splice($this->availableMethods, array_search($method, $this->availableMethods), 1);
     }
@@ -237,7 +240,7 @@ class Api extends APISimple
     private function handleMultipleResults($res)
     {
         if (count($res) == 0) {
-            throw new Exception("No matching resources found", 404);
+            throw new NotFoundException("No matching resources found");
         }
 
         // Restriction
@@ -280,7 +283,7 @@ class Api extends APISimple
             if ($this->model instanceof RestrictedView && $this->authvalue != null) {
 
                 if ($this->model->restrictedValue() != $this->authvalue) {
-                    throw new Exception("Not authorized", 403);
+                    throw new NotAuthorizedException();
                 }
             }
         }

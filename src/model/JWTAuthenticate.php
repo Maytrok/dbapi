@@ -2,6 +2,7 @@
 
 namespace dbapi\model;
 
+use dbapi\exception\NoValidSessionException;
 use dbapi\interfaces\Authenticate;
 use Firebase\JWT\JWT;
 use Exception;
@@ -20,29 +21,39 @@ abstract class JWTAuthenticate extends ModelBasic implements Authenticate
 
     public function authenticate(&$model = null)
     {
-        $session_error = "Keine gültige Sitzung";
-        if (!key_exists("JWT", getallheaders())) {
-            throw new Exception("Not JWT Header was submittet", 403);
-        };
-        $jwt = getallheaders()["JWT"];
-        if (strlen($jwt) == 0) {
-            throw new Exception($session_error, 403);
-        }
 
-        $dec = JWT::decode(getallheaders()["JWT"], $this->getJWTKeySecret(), array('HS256'));
-        $this->get($dec->userid);
-        self::$id = $this->getId();
-        if ($jwt != $this->getJwt()) {
-            throw new Exception($session_error, 403);
-        }
+        try {
+            $session_error = "Keine gültige Sitzung";
+            if (!key_exists("JWT", getallheaders())) {
+                throw new NoValidSessionException("Not JWT Header was submitted", 403);
+            };
+            $jwt = getallheaders()["JWT"];
+            if (strlen($jwt) == 0) {
+                throw new NoValidSessionException($session_error, 403);
+            }
 
-        // If instance of Restricted View the Result will be affected
-        if ($model != null && $model instanceof RestrictedView) {
-            $key = $model->restrictedKey();
-            $_GET[$key] = $this->getId();
-            $_POST[$key] = $this->getId();
-            $key = "set" . ucfirst($key);
-            $model->$key = $this->getId();
+            $dec = JWT::decode(getallheaders()["JWT"], $this->getJWTKeySecret(), array('HS256'));
+            $this->get($dec->userid);
+            self::$id = $this->getId();
+            if ($jwt != $this->getJwt()) {
+                throw new NoValidSessionException($session_error, 403);
+            }
+
+            // If instance of Restricted View the Result will be affected
+            if ($model != null && $model instanceof RestrictedView) {
+                $key = $model->restrictedKey();
+                $_GET[$key] = $this->getId();
+                $_POST[$key] = $this->getId();
+                $key = "set" . ucfirst($key);
+                $model->$key = $this->getId();
+            }
+        } catch (Exception $th) {
+
+            http_response_code($th->getCode());
+
+            $classname = explode("\\", get_class($th));
+            echo json_encode(['error' => $th->getMessage(), "exception" => $classname[count($classname) - 1]]);
+            exit();
         }
     }
 
