@@ -5,6 +5,7 @@ namespace dbapi\controller;
 use Exception;
 use Throwable;
 use dbapi\db\Database;
+use dbapi\tools\App;
 
 class APISimple
 {
