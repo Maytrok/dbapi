@@ -23,26 +23,32 @@ class Api extends APISimple
 
     private $_hook_output = null, $_hook_checkAuth;
 
-    public function __construct(ModelBasic $_model, $authvalue = null)
+    public function __construct(ModelBasic $_model)
     {
         $this->model = $_model;
-        $this->authvalue = $authvalue;
     }
 
     protected function get()
     {
 
         $this->isMethodAllowed("get");
+
         // Single
         if (isset($_GET['id'])) {
 
-            if ($this->authvalue != null && $this->model instanceof RestrictedView) {
-                $this->model->get($this->getRequestID());
-                if ($this->model->restrictedValue() != $this->authvalue) {
-                    throw new NotAuthorizedException();
+            if ($this->model instanceof RestrictedView) {
+
+                Database::$throwExceptionOnNotFound = true;
+                $result = Database::get($this->model::getDB(), $this->model::getTableName(), $this->getRequestID());
+                if (count($this->getAdditionalGetParams()) != 0) {
+                    if ($result[$this->model->restrictedKey()] != $this->getAdditionalGetParams()[$this->model->restrictedKey()]) {
+                        throw new NotAuthorizedException();
+                    } else {
+
+                        $this->output($result);
+                    }
                 } else {
-                    Database::$throwExceptionOnNotFound = true;
-                    $this->output(Database::get($this->model::getDB(), $this->model::getTableName(), $this->getRequestID()));
+                    $this->output($result);
                 }
             } else {
                 Database::$throwExceptionOnNotFound = true;
@@ -51,7 +57,6 @@ class Api extends APISimple
             }
         } else if (count($this->getAdditionalGetParams()) != 0) {
             // Specific querys
-
             if ($pagination = $this->isPageination()) {
 
                 list($page, $per_page) = $pagination;
@@ -73,7 +78,7 @@ class Api extends APISimple
                 if ($this->isCountRequest()) {
                     $this->output(['count' => Database::countResults($this->model::getDB(), $this->model::getTableName())]);
                 } else {
-
+                    echo "Ddd";
                     $this->handleMultipleResults(Database::getAll($this->model::getDB(), $this->model::getTableName()));
                 }
             }
@@ -313,6 +318,7 @@ class Api extends APISimple
         }
 
         if ($result !== false && is_array($result)) {
+            self::setJSONHeader();
             echo json_encode($result);
         }
     }
