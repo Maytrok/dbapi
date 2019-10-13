@@ -22,6 +22,7 @@ class ClassGenerator
     $this->tbname = $tablename;
     $this->db = $db;
 
+    $this->primaryKeyAvailable();
     $pdo = Database::getPDO();
 
     $sth = $pdo->prepare("DESCRIBE " . $db . "." . $tablename);
@@ -176,6 +177,17 @@ use dbapi\interfaces\ModelProps;";
   }";
   }
 
+  private function primaryKeyAvailable()
+  {
+    foreach (Database::getPDO()->query("DESCRIBE " . $this->db . "." . $this->tbname) as $value) {
+
+      if ($value['Field'] == "id") {
+        if (false === strpos($value['Key'], "PRI")) {
+          throw new Exception("The ID key has to be an primary key", 500);
+        }
+      }
+    }
+  }
 
   private function abstractMethods($fields)
   {
