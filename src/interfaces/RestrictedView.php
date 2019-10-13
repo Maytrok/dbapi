@@ -7,11 +7,13 @@ namespace dbapi\interfaces;
  */
 interface RestrictedView
 {
+    /*
+    * Key of the Property whcich limits the result may be shown
+    */
+    public function restrictedKey();
 
     /**
-     * Diese Funktion muss den Key zurückgeben, gegen den Authentifiziert werden soll
-     * 
+     * Value of the Property
      */
     public function restrictedValue();
-    public function restrictedKey();
 }
