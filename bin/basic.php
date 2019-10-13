@@ -13,6 +13,13 @@ function my_autoloader($class)
 
 function utf8encodeArray($array)
 {
+    if (!is_array($array)) {
+        return $array;
+    }
+
+    if (count($array) == 0) {
+        return $array;
+    }
     foreach ($array as $key =>  $value) {
         if (is_array($value)) {
             $array[$key] = utf8encodeArray($value);
