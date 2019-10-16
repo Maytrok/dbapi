@@ -9,7 +9,7 @@ use dbapi\exception\BadRequestException;
 use dbapi\exception\RequestMethodNotAllowedException;
 use dbapi\tools\App;
 
-class APISimple
+class ApiSimple
 {
     protected $availableMethods = ["_get", "_post", "_patch", "_delete"];
 
