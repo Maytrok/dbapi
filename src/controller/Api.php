@@ -70,7 +70,8 @@ class Api extends ApiSimple
             if ($pagination = $this->isPageination()) {
 
                 list($page, $per_page) = $pagination;
-
+                $count = ceil(Database::countResults($this->modelDb, $this->modelTable, $this->getAdditionalGetParams()) / $per_page);
+                $this->view->setData(["pages" => $count]);
                 $this->handleMultipleResults(Database::where($this->modelDb, $this->modelTable, $this->getAdditionalGetParams(), $per_page, $page));
             } else {
                 if ($this->isCountRequest()) {
@@ -84,6 +85,8 @@ class Api extends ApiSimple
         } else {
             if ($pagination = $this->isPageination()) {
                 list($page, $per_page) = $pagination;
+                $count = ceil(Database::countResults($this->modelDb, $this->modelTable) / $per_page);
+                $this->view->setData(["pages" => $count]);
                 $this->handleMultipleResults(Database::getAll($this->modelDb, $this->modelTable, $per_page, $page));
                 return;
             } else {
