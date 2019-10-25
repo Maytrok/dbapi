@@ -11,7 +11,8 @@ use dbapi\exception\NotFoundException;
 use dbapi\interfaces\ModelProps;
 use dbapi\interfaces\RestrictedView;
 
-class Api extends APISimple
+
+class Api extends ApiSimple
 {
 
     /**
@@ -23,9 +24,14 @@ class Api extends APISimple
 
     private $_hook_output = null, $_hook_checkAuth;
 
+    private $modelTable, $modelDb;
+
     public function __construct(ModelBasic $_model)
     {
         $this->model = $_model;
+        $t = get_class($_model);
+        $this->modelTable = $t::getTableName();
+        $this->modelDb = $t::getDB();
     }
 
     protected function get()
@@ -39,7 +45,8 @@ class Api extends APISimple
             if ($this->model instanceof RestrictedView) {
 
                 Database::$throwExceptionOnNotFound = true;
-                $result = Database::get($this->model::getDB(), $this->model::getTableName(), $this->getRequestID());
+
+                $result = Database::get($this->modelDb, $this->modelTable, $this->getRequestID());
                 if (count($this->getAdditionalGetParams()) != 0) {
                     if ($result[$this->model->restrictedKey()] != $this->getAdditionalGetParams()[$this->model->restrictedKey()]) {
                         throw new NotAuthorizedException();
@@ -52,7 +59,7 @@ class Api extends APISimple
                 }
             } else {
                 Database::$throwExceptionOnNotFound = true;
-                $this->output(Database::get($this->model::getDB(), $this->model::getTableName(), $this->getRequestID()));
+                $this->output(Database::get($this->modelDb, $this->modelTable, $this->getRequestID()));
                 exit();
             }
         } else if (count($this->getAdditionalGetParams()) != 0) {
@@ -61,25 +68,24 @@ class Api extends APISimple
 
                 list($page, $per_page) = $pagination;
 
-                $this->handleMultipleResults(Database::where($this->model::getDB(), $this->model::getTableName(), $this->getAdditionalGetParams(), $per_page, $page));
+                $this->handleMultipleResults(Database::where($this->modelDb, $this->modelTable, $this->getAdditionalGetParams(), $per_page, $page));
             } else {
                 if ($this->isCountRequest()) {
-                    $this->output(['count' => Database::countResults($this->model::getDB(), $this->model::getTableName(), $this->getAdditionalGetParams())]);
+                    $this->output(['count' => Database::countResults($this->modelDb, $this->modelTable, $this->getAdditionalGetParams())]);
                 } else {
-                    $this->handleMultipleResults(Database::where($this->model::getDB(), $this->model::getTableName(), $this->getAdditionalGetParams()));
+                    $this->handleMultipleResults(Database::where($this->modelDb, $this->modelTable, $this->getAdditionalGetParams()));
                 }
             }
         } else {
             if ($pagination = $this->isPageination()) {
                 list($page, $per_page) = $pagination;
-                $this->handleMultipleResults(Database::getAll($this->model::getDB(), $this->model::getTableName(), $per_page, $page));
+                $this->handleMultipleResults(Database::getAll($this->modelDb, $this->modelTable, $per_page, $page));
             } else {
 
                 if ($this->isCountRequest()) {
-                    $this->output(['count' => Database::countResults($this->model::getDB(), $this->model::getTableName())]);
+                    $this->output(['count' => Database::countResults($this->modelDb, $this->modelTable)]);
                 } else {
-                    echo "Ddd";
-                    $this->handleMultipleResults(Database::getAll($this->model::getDB(), $this->model::getTableName()));
+                    $this->handleMultipleResults(Database::getAll($this->modelDb, $this->modelTable));
                 }
             }
         }
@@ -156,7 +162,7 @@ class Api extends APISimple
             if ($statuscode != 200) {
                 http_response_code(201);
             };
-            $res = Database::get($this->model::getDB(), $this->model::getTableName(), $this->model->getId());
+            $res = Database::get($this->modelDb, $this->modelTable, $this->model->getId());
             $this->output($res);
             return true;
         } else {
