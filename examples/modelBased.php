@@ -2,6 +2,7 @@
 
 use dbapi\controller\Api;
 use dbapi\db\Database;
+use dbapi\interfaces\DefaultView;
 use php\klassen\Content;
 use dbapi\tools\EnvReader;
 
@@ -42,14 +43,14 @@ $api->disallowMethod(Api::$DELETE);
 
 // The output hook is called at each output
 // To modify the output just return the edited output
-$api->hookOutput(function ($output, $REQUEST_METHOD) {
+$api->hookOutput(function (DefaultView $view, $REQUEST_METHOD) {
 
     // Adding greeting to each GET Request
     if ($REQUEST_METHOD == "GET") {
-        $output['greetings'] = "Hello there";
+        $view->setData(['greetings' => "Hello there"]);
     }
 
-    return $output;
+    return $view;
 });
 
 

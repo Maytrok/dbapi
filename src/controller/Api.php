@@ -22,12 +22,13 @@ class Api extends ApiSimple
 
     private $authvalue;
 
-    private $_hook_output = null, $_hook_checkAuth;
+    private $_hook_checkAuth;
 
     private $modelTable, $modelDb;
 
     public function __construct(ModelBasic $_model)
     {
+        parent::__construct();
         $this->model = $_model;
         $t = get_class($_model);
         $this->modelTable = $t::getTableName();
@@ -52,15 +53,17 @@ class Api extends ApiSimple
                         throw new NotAuthorizedException();
                     } else {
 
-                        $this->output($result);
+                        $this->view->setMainData($result);
+                        return;
                     }
                 } else {
-                    $this->output($result);
+                    $this->view->setMainData($result);
+                    return;
                 }
             } else {
                 Database::$throwExceptionOnNotFound = true;
-                $this->output(Database::get($this->modelDb, $this->modelTable, $this->getRequestID()));
-                exit();
+                $this->view->setMainData(Database::get($this->modelDb, $this->modelTable, $this->getRequestID()));
+                return;
             }
         } else if (count($this->getAdditionalGetParams()) != 0) {
             // Specific querys
@@ -71,21 +74,26 @@ class Api extends ApiSimple
                 $this->handleMultipleResults(Database::where($this->modelDb, $this->modelTable, $this->getAdditionalGetParams(), $per_page, $page));
             } else {
                 if ($this->isCountRequest()) {
-                    $this->output(['count' => Database::countResults($this->modelDb, $this->modelTable, $this->getAdditionalGetParams())]);
+                    $this->view->setData(['count' => Database::countResults($this->modelDb, $this->modelTable, $this->getAdditionalGetParams())]);
+                    return;
                 } else {
                     $this->handleMultipleResults(Database::where($this->modelDb, $this->modelTable, $this->getAdditionalGetParams()));
+                    return;
                 }
             }
         } else {
             if ($pagination = $this->isPageination()) {
                 list($page, $per_page) = $pagination;
                 $this->handleMultipleResults(Database::getAll($this->modelDb, $this->modelTable, $per_page, $page));
+                return;
             } else {
 
                 if ($this->isCountRequest()) {
-                    $this->output(['count' => Database::countResults($this->modelDb, $this->modelTable)]);
+                    $this->view->setData(['count' => Database::countResults($this->modelDb, $this->modelTable)]);
+                    return;
                 } else {
                     $this->handleMultipleResults(Database::getAll($this->modelDb, $this->modelTable));
+                    return;
                 }
             }
         }
@@ -126,8 +134,7 @@ class Api extends ApiSimple
         $this->checkAuth();
         $this->model->delete();
 
-        $this->output(["erfolg" => true, "id" => $this->model->getId()]);
-
+        $this->view->setData(["id" => $this->model->getId()]);
         return;
     }
 
@@ -163,7 +170,7 @@ class Api extends ApiSimple
                 http_response_code(201);
             };
             $res = Database::get($this->modelDb, $this->modelTable, $this->model->getId());
-            $this->output($res);
+            $this->view->setData($res);
             return true;
         } else {
             return false;
@@ -257,10 +264,10 @@ class Api extends ApiSimple
         // Restriction
 
         if ($this->model instanceof RestrictedView && $this->authvalue != null) {
-            $this->output($res);
+            $this->view->setMainData($res);
         } else {
 
-            $this->output($res);
+            $this->view->setMainData($res);
         }
     }
 
@@ -301,32 +308,12 @@ class Api extends ApiSimple
     }
 
 
-    public function hookOutput($fnc)
-    {
-        if (!is_callable($fnc)) {
-            throw new Exception("Parameter has to be an Funktion", 500);
-        }
-        $this->_hook_output = $fnc;
-    }
-
     public function hookAuth($fnc)
     {
         if (!is_callable($fnc)) {
             throw new Exception("Parameter has to be an Funktion", 500);
         }
         $this->_hook_checkAuth = $fnc;
-    }
-
-    protected function output($result)
-    {
-        if ($this->_hook_output != null) {
-            $result = call_user_func($this->_hook_output, $result, $_SERVER['REQUEST_METHOD']);
-        }
-
-        if ($result !== false && is_array($result)) {
-            self::setJSONHeader();
-            echo json_encode($result);
-        }
     }
 
     protected function isMethodAllowed($method)

@@ -3,11 +3,10 @@
 namespace dbapi\controller;
 
 use Exception;
-use Throwable;
-use dbapi\db\Database;
 use dbapi\exception\BadRequestException;
 use dbapi\exception\RequestMethodNotAllowedException;
-use dbapi\tools\App;
+use dbapi\interfaces\DefaultView;
+use dbapi\views\DefaultView as DbapiDefaultView;
 
 class ApiSimple
 {
@@ -19,11 +18,22 @@ class ApiSimple
     private $_get, $_post, $_patch, $_delete;
     protected $requiredParams = [];
 
+    protected $_hook_output = null;
+
     public static $DELETE = "_delete";
     public static $POST = "_post";
     public static $PATCH = "_patch";
     public static $GET = "_get";
 
+    /**
+     * @var DefaultView
+     */
+    public $view = null;
+
+    public function __construct()
+    {
+        $this->view = $this->getView();
+    }
 
     protected function get()
     {
@@ -116,34 +126,40 @@ class ApiSimple
 
     public function run()
     {
-        self::setJSONHeader();
         try {
             switch ($_SERVER['REQUEST_METHOD']) {
                 case 'GET':
-                    return $this->get();
+                    $this->get();
+                    break;
                 case "POST":
-
-                    return $this->post();
+                    $this->post();
+                    break;
                 case 'PATCH':
-
-                    return $this->patch();
+                    $this->patch();
+                    break;
                 case 'DELETE':
-                    return $this->delete();
+                    $this->delete();
+                    break;
                 case 'OPTIONS':
-
-                    return $this->options();
+                    $this->options();
+                    return;
 
                 default;
                     throw new RequestMethodNotAllowedException();
             }
+
+            if ($this->_hook_output != null) {
+                $this->view = call_user_func($this->_hook_output, $this->view, $_SERVER['REQUEST_METHOD']);
+            }
+            $this->view->output();
         } catch (\Exception $th) {
-            self::handleError($th);
+            $this->view->error($th);
         }
     }
 
     public static function setJSONHeader()
     {
-        header('Content-Type: application/json');
+        $this->view->setEncoding();
     }
 
     public function getParamBody()
@@ -245,31 +261,6 @@ class ApiSimple
         }
     }
 
-    public static function handleError(Exception $th)
-    {
-        $code = $th->getCode() == 0 ? 500 : $th->getCode();
-        if (!is_int($code)) {
-            http_response_code(400);
-        } else {
-
-            http_response_code($code);
-        }
-
-        $classname = explode("\\", get_class($th));
-
-        if (App::$DEBUG) {
-            echo json_encode([
-                "error" => $th->getMessage(), "trace" => $th->getTrace(),
-                "DB" => Database::getPDO()->errorInfo(),
-                "exception" => $classname[count($classname) - 1]
-            ]);
-        } else {
-            echo json_encode(["error" => $th->getMessage(), "exception" => $classname[count($classname) - 1]]);
-
-            exit();
-        }
-    }
-
     public static final function handleOptionCall()
     {
         if ($_SERVER['REQUEST_METHOD'] == "OPTIONS") {
@@ -279,5 +270,21 @@ class ApiSimple
             header("access-control-allow-credentials: true");
             exit();
         }
+    }
+
+    public function hookOutput($fnc)
+    {
+        if (!is_callable($fnc)) {
+            throw new Exception("Parameter has to be an Funktion", 500);
+        }
+        $this->_hook_output = $fnc;
+    }
+
+    /**
+     * @return DefaultView
+     */
+    protected function getView()
+    {
+        return new DbapiDefaultView;
     }
 }

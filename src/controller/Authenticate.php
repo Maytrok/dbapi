@@ -15,8 +15,9 @@ class Authenticate extends APISimple
     public function __construct($model)
     {
 
+        parent::__construct();
         if (!$model instanceof DbapiAuthenticate) {
-            throw new Exception("Model in Authenticate needed to be an instance of Authenticate Model", 500);
+            $this->view->error(new Exception("Model in Authenticate has to be an instance of Authenticate Model", 500));
         }
         $this->model = $model;
 
@@ -28,9 +29,9 @@ class Authenticate extends APISimple
             $res = $this->model->login($username, $password);
 
             if (false !== $res) {
-                echo json_encode($res);
+                $this->view->setData($res);
             } else {
-                throw new NotAuthorizedException("User unknown or Password is wrong");
+                $this->view->error(new NotAuthorizedException("User unknown or Password is wrong"));
             }
         }, ['user', "password"]);
     }
@@ -38,9 +39,9 @@ class Authenticate extends APISimple
     protected function delete()
     {
         if ($this->model->logout()) {
-            echo json_encode(['erfolg' => true]);
+            $this->view->setData(["msg" => "successfully logged out"]);
         } else {
-            throw new Exception("Error on Logout", 500);
+            $this->view->error(new Exception("Error on Logout", 500));
         }
     }
 
