@@ -85,4 +85,12 @@ class DefaultView implements DbapiDefaultView
         }
         $this->data = array_merge($this->data, $array);
     }
+
+    /**
+     * @return array
+     */
+    public function getMainData()
+    {
+        return $this->data[$this->dataKey];
+    }
 }
