@@ -173,7 +173,7 @@ class Api extends ApiSimple
                 http_response_code(201);
             };
             $res = Database::get($this->modelDb, $this->modelTable, $this->model->getId());
-            $this->view->setData($res);
+            $this->view->setMainData($res);
             return true;
         } else {
             return false;
