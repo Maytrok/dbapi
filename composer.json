@@ -1,0 +1,17 @@
+{
+  "name": "maytrok/dbapi",
+  "description": "A Simple Database model with Rest Api",
+  "homepage": "https://github.com/maytrok/dbapi",
+  "authors": [
+    {
+      "name": "Maytrok",
+      "email": "bluna.el@gmx.de"
+    }
+  ],
+  "autoload": {
+    "psr-4": {
+      "dbapi\\": "src"
+    }
+  },
+  "require": {}
+}

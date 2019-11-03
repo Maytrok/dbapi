@@ -6,6 +6,7 @@ use dbapi\exception\NotFoundException;
 use PDO;
 use Exception;
 use dbapi\tools\EnvReader;
+use dbapi\tools\Utils;
 
 class Database extends PDO
 {
@@ -59,7 +60,7 @@ class Database extends PDO
                 throw new NotFoundException();
             }
         }
-        $res = utf8encodeArray($sth->fetch());
+        $res = Utils::utf8encodeArray($sth->fetch());
         return $res;
     }
 
@@ -78,7 +79,7 @@ class Database extends PDO
                 throw new NotFoundException();
             }
         }
-        $res = utf8encodeArray($sth->fetchAll());
+        $res = Utils::utf8encodeArray($sth->fetchAll());
         return $res;
     }
 
