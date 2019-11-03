@@ -2,17 +2,32 @@
   "name": "maytrok/dbapi",
   "description": "A Simple Database model with Rest Api",
   "homepage": "https://github.com/maytrok/dbapi",
+  "version": "0.1.0",
+  "type": "library",
+  "keywords": [
+    "database",
+    "api",
+    "restapi",
+    "database model",
+    "simple"
+  ],
   "authors": [
     {
       "name": "Maytrok",
-      "email": "bluna.el@gmx.de"
+      "email": "bluna.el@gmx.de",
+      "role": "Developer"
     }
   ],
   "license": "BSD-3-Clause",
   "autoload": {
+    "exclude-from-classmap": [
+      "test/"
+    ],
     "psr-4": {
       "dbapi\\": "src"
     }
   },
-  "require": {}
+  "require": {
+    "php": ">=5.3.0"
+  }
 }
