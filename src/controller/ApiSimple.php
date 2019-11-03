@@ -159,7 +159,7 @@ class ApiSimple
 
     public static function setJSONHeader()
     {
-        $this->view->setEncoding();
+        header('Content-Type: application/json');
     }
 
     public function getParamBody()
