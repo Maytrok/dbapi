@@ -157,7 +157,7 @@ class Database extends PDO
 
         foreach ($arr as $key => $prop) {
 
-            if ($prop == null || $prop == "") {
+            if ($prop === null || $prop === "") {
                 continue;
             }
 
@@ -171,7 +171,7 @@ class Database extends PDO
         $sth = self::getPDO()->prepare($query);
         foreach ($arr as $key => $prop) {
 
-            if ($prop == null || $prop == "") {
+            if ($prop === null || $prop === "") {
                 continue;
             }
             $sth->bindValue(":" . $key, $prop);
