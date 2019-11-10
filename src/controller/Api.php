@@ -26,7 +26,7 @@ class Api extends ApiSimple
 
     private $_hook_special_get;
 
-    protected $reservedQueryParams = ['id', 'page', "per_page", "count", "special_get"];
+    protected $reservedQueryParams = ['id', 'page', "per_page", "count", "special_get", "special_get_payload"];
 
     private $modelTable, $modelDb;
 
@@ -354,5 +354,10 @@ class Api extends ApiSimple
     protected function getSpecialParam()
     {
         return isset($_GET['special_get']) ? $_GET['special_get'] : '';
+    }
+
+    protected function getSpecialPayload()
+    {
+        return isset($_GET['special_get_payload']) ? $_GET['special_get_payload'] : '';
     }
 }
