@@ -53,5 +53,17 @@ $api->hookOutput(function (DefaultView $view, $REQUEST_METHOD) {
     return $view;
 });
 
+// The hook will be called instead of the normal Get procedure
+$api->hookSpecialGet(function (DefaultView $view, $request) {
+
+    if ($request == "latest") {
+        $sth = Database::getPDO()->prepare("select * from jwt.content where id > 20");
+        $sth->execute();
+        $view->setMainData($sth->fetchAll());
+    }
+    // The View has to be returned
+    return $view;
+});
+
 
 $api->run();

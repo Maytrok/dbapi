@@ -24,6 +24,10 @@ class Api extends ApiSimple
 
     private $_hook_checkAuth;
 
+    private $_hook_special_get;
+
+    protected $reservedQueryParams = ['id', 'page', "per_page", "count", "special_get"];
+
     private $modelTable, $modelDb;
 
     public function __construct(ModelBasic $_model)
@@ -39,6 +43,12 @@ class Api extends ApiSimple
     {
 
         $this->isMethodAllowed("get");
+
+        if ($this->getSpecialParam() != '' && $this->_hook_special_get != null) {
+            $this->specialGet();
+
+            return;
+        }
 
         // Single
         if (isset($_GET['id'])) {
@@ -264,14 +274,7 @@ class Api extends ApiSimple
             throw new NotFoundException("No matching resources found");
         }
 
-        // Restriction
-
-        if ($this->model instanceof RestrictedView && $this->authvalue != null) {
-            $this->view->setMainData($res);
-        } else {
-
-            $this->view->setMainData($res);
-        }
+        $this->view->setMainData($res);
     }
 
     protected function isPageination()
@@ -319,10 +322,37 @@ class Api extends ApiSimple
         $this->_hook_checkAuth = $fnc;
     }
 
+    /**
+     * @param function
+     * The Lamba function has to return the View given in the 1.param
+     * 1 Param DefaultView
+     * 2 Param the special request param
+     */
+    public function hookSpecialGet($fnc)
+    {
+        if (!is_callable($fnc)) {
+            throw new Exception("Parameter has to be an Funktion", 500);
+        }
+        $this->_hook_special_get = $fnc;
+    }
+
+    private final function specialGet()
+    {
+        if ($this->_hook_special_get != null && $this->getSpecialParam() != '') {
+            $this->view = call_user_func($this->_hook_special_get, $this->view, $this->getSpecialParam());
+        }
+    }
+
+
     protected function isMethodAllowed($method)
     {
         if (!in_array("_" . strtolower($method), $this->availableMethods)) {
             throw new Exception("Request Method not Allowed", 405);
         }
+    }
+
+    protected function getSpecialParam()
+    {
+        return isset($_GET['special_get']) ? $_GET['special_get'] : '';
     }
 }
