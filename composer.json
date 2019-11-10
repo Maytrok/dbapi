@@ -2,7 +2,7 @@
   "name": "maytrok/dbapi",
   "description": "A Simple Database model with Rest Api",
   "homepage": "https://github.com/maytrok/dbapi",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "type": "library",
   "keywords": [
     "database",
@@ -21,7 +21,8 @@
   "license": "BSD-3-Clause",
   "autoload": {
     "exclude-from-classmap": [
-      "test/"
+      "test/",
+      "examples/"
     ],
     "psr-4": {
       "dbapi\\": "src"

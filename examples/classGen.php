@@ -20,13 +20,16 @@ Database::open(new EnvReader(__DIR__));
 // getter => automatic generate getters for the new Class
 // setter =>  automatic generate setters for the new Class
 // interface => an interface to definet which propertie are needed for an save
-$config = ["abstract" => true, "path" => "./php/klassen/", "getter" => true, "setter" => true, "interface" => true];
+// namespace => defines the namespace of the class
+$config = ["abstract" => true, "path" => "./php/klassen/", "getter" => true, "setter" => true, "interface" => true, "namespace" => "app"];
 
 //should be called from the root directory - See Path option
 // To Generate an class an ID field with Primary option is required
 
 // Generate a Single Class
-new ClassGenerator("testTable", "testDb", $config);
+new ClassGenerator("testTable", "testDb");
+
+new ClassGenerator("anotherTestTable", "testDb", $config);
 
 
 // Generate a Class for each table in the given db

@@ -11,7 +11,7 @@ class ClassGenerator
 
   private $tbname, $db, $body = "";
 
-  private $config = ["abstract" => true, "path" => "./php/klassen/", "getter" => true, "setter" => true, "interface" => true];
+  private $config = ["abstract" => true, "path" => "./php/klassen/", "getter" => true, "setter" => true, "interface" => true, "namespace" => "php\klassen"];
 
 
   public function __construct($tablename, $db, $config = [])
@@ -32,13 +32,13 @@ class ClassGenerator
     if ($this->config['abstract']) {
       $this->body = "<?php
             
-namespace php\klassen\basic;
+namespace " . $this->config['namespace'] . "\basic;
       
 use dbapi\model\ModelBasic;";
     } else {
       $this->body = "<?php
             
-namespace php\klassen;
+namespace " . $this->config['namespace'] . ";
       
 use dbapi\model\ModelBasic;";
     }
@@ -76,13 +76,12 @@ use dbapi\interfaces\ModelProps;";
     foreach ($fields as $value) {
       if ($value == "id") continue;
 
-      $this->body .= "  protected $" . $value . ";
+      $this->body .= "  protected $" . strtolower($value) . ";
 ";
     }
 
     $this->body .= "
-        
-        
+          
         ";
 
     if ($this->config['interface']) {
@@ -148,7 +147,7 @@ use dbapi\interfaces\ModelProps;";
     }
 
     if (!$found) {
-      throw new Exception("ID key is required");
+      throw new Exception("ID key is required on table" . $this->tbname);
     }
     return $fields;
   }
@@ -159,7 +158,8 @@ use dbapi\interfaces\ModelProps;";
 
     $this->body .= "
   public function requiredProps()
-  {";
+  {
+";
 
     $ar = [];
     foreach (Database::getPDO()->query("DESCRIBE " . $this->db . "." . $this->tbname) as $value) {
@@ -169,11 +169,16 @@ use dbapi\interfaces\ModelProps;";
         if ($value["Field"] == "id") {
           continue;
         }
-        $ar[] = $value["Field"];
+        $ar[] = strtolower($value["Field"]);
       }
     }
-    $this->body .= "return [\"" . implode("\",\"", $ar) . "\"];
 
+    $suchmuster = '/[\\-\.\(\)\_]/';
+    if (preg_match($suchmuster, implode("\", \"", $ar)) > 0) {
+      throw new Exception("One or more Columns from " . $this->tbname . " did not match the regex Pattern");
+    }
+    $this->body .= "    return [\"" . implode("\", \"", $ar) . "\"];
+    
   }";
   }
 
@@ -208,7 +213,7 @@ use dbapi\interfaces\ModelProps;";
         
   public function getProperties()
   {
-    return [\"" . implode("\",\"", $fields) . "\"];
+    return [\"" . implode("\", \"", $fields) . "\"];
   }";
   }
 
@@ -217,7 +222,7 @@ use dbapi\interfaces\ModelProps;";
 
     foreach ($fields as $value) {
       $this->body .= "
-  public function get" . ucfirst($value) . "()
+  public function get" . ucfirst(strtolower($value)) . "()
   {
     return \$this->$value;
   }";
@@ -230,7 +235,7 @@ use dbapi\interfaces\ModelProps;";
 
     foreach ($fields as $value) {
       $this->body .= "
-  public function set" . ucfirst($value) . "(\$value)
+  public function set" . ucfirst(strtolower($value)) . "(\$value)
   {
     \$this->$value = \$value;
   }";
