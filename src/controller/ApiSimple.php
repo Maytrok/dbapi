@@ -182,7 +182,7 @@ class ApiSimple
         }
         if (key_exists('Content-Type', getallheaders())) {
 
-            if (in_array(getallheaders()['Content-Type'], ["application/json", "application/json;charset=utf-8"])) {
+            if (strstr(getallheaders()['Content-Type'], "json")) {
                 return json_decode($string, true);
             }
         }
