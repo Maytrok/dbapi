@@ -173,7 +173,7 @@ use dbapi\interfaces\ModelProps;";
       }
     }
 
-    $suchmuster = '/[\\-\.\(\)\_]/';
+    $suchmuster = '/[\\-\.\(\)]/';
     if (preg_match($suchmuster, implode("\", \"", $ar)) > 0) {
       throw new Exception("One or more Columns from " . $this->tbname . " did not match the regex Pattern");
     }
