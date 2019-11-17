@@ -51,15 +51,23 @@ class DefaultView implements DbapiDefaultView
             http_response_code($code);
         }
         $classname = explode("\\", get_class($th));
+        $d = [
+            "status" => "error",
+            "error" => $th->getMessage(), "trace" => $th->getTrace(),
+            "DB" => Database::getPDO()->errorInfo(),
+            "exception" => $classname[count($classname) - 1]
+        ];
+
+        if ($code >= 500 && $code <= 599) {
+
+            App::$looger->error("An error occured", $d);
+        } else if ($code >= 400 && $code <= 499) {
+            App::$looger->notice("An error occured", $d);
+        }
+
         if (App::$DEBUG) {
 
-            $this->data  = [
-                "status" => "error",
-                "error" => $th->getMessage(), "trace" => $th->getTrace(),
-                "DB" => Database::getPDO()->errorInfo(),
-                "exception" => $classname[count($classname) - 1]
-            ];
-
+            $this->data  = $d;
             $this->output();
         } else {
             $this->data = ["status" => "error", "error" => $th->getMessage(), "exception" => $classname[count($classname) - 1]];

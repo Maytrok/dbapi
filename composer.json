@@ -20,6 +20,9 @@
   ],
   "license": "BSD-3-Clause",
   "autoload": {
+    "files": [
+      "./bin/bootstrap.php"
+    ],
     "exclude-from-classmap": [
       "test/",
       "examples/"
@@ -29,6 +32,7 @@
     }
   },
   "require": {
-    "php": ">=5.3.0"
+    "php": ">=5.3.0",
+    "monolog/monolog": "1.*"
   }
 }
