@@ -41,7 +41,7 @@ class Authenticate extends APISimple
         if ($this->model->logout()) {
             $this->view->setData(["msg" => "successfully logged out"]);
         } else {
-            $this->view->error(new Exception("Error on Logout", 500));
+            $this->view->error(new Exception("Error on Logout", HttpCode::INTERNAL_SERVER_ERROR));
         }
     }
 

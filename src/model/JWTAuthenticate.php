@@ -9,6 +9,7 @@ use Firebase\JWT\JWT;
 use Exception;
 use dbapi\model\ModelBasic;
 use dbapi\interfaces\RestrictedView;
+use dbapi\tools\HttpCode;
 
 abstract class JWTAuthenticate extends ModelBasic implements Authenticate
 {
@@ -28,18 +29,18 @@ abstract class JWTAuthenticate extends ModelBasic implements Authenticate
         try {
             $session_error = "Keine gültige Sitzung";
             if (!key_exists("JWT", getallheaders())) {
-                throw new NoValidSessionException("No JWT Header was submitted", 403);
+                throw new NoValidSessionException("No JWT Header was submitted", HttpCode::FORBIDDEN);
             };
             $jwt = getallheaders()["JWT"];
             if (strlen($jwt) == 0) {
-                throw new NoValidSessionException($session_error, 403);
+                throw new NoValidSessionException($session_error, HttpCode::FORBIDDEN);
             }
 
             $dec = JWT::decode(getallheaders()["JWT"], $this->getJWTKeySecret(), array('HS256'));
             $this->get($dec->userid);
             self::$id = $this->getId();
             if ($jwt != $this->getJwt()) {
-                throw new NoValidSessionException($session_error, 403);
+                throw new NoValidSessionException($session_error, HttpCode::FORBIDDEN);
             }
 
             // If instance of Restricted View the Result will be affected
@@ -67,7 +68,7 @@ abstract class JWTAuthenticate extends ModelBasic implements Authenticate
         $this->where(["name" => $username]);
 
         if (!password_verify($password, $this->getPasswort())) {
-            throw new Exception("Falsches Password oder Benutzername", 403);
+            throw new Exception("Falsches Password oder Benutzername", HttpCode::FORBIDDEN);
         } else {
             $token = array(
                 'userid' => $this->getId(),
@@ -94,7 +95,7 @@ abstract class JWTAuthenticate extends ModelBasic implements Authenticate
     {
 
         if (!isset(getallheaders()['JWT'])) {
-            throw new Exception("Error on Logout. Token was not submitted", 400);
+            throw new Exception("Error on Logout. Token was not submitted", HttpCode::BAD_REQUEST);
         }
         $jwt = getallheaders()['JWT'];
 

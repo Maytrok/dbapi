@@ -6,6 +6,7 @@ use dbapi\exception\NotFoundException;
 use PDO;
 use Exception;
 use dbapi\tools\EnvReader;
+use dbapi\tools\HttpCode;
 use dbapi\tools\Utils;
 
 class Database extends PDO
@@ -95,7 +96,7 @@ class Database extends PDO
         $query = "SELECT * from " . $db . "." . $table . " where ";
 
         if (!is_array($where)) {
-            throw new Exception("Where Param has to be an array", 500);
+            throw new Exception("Where Param has to be an array", HttpCode::INTERNAL_SERVER_ERROR);
         }
 
         $parms = [];
@@ -220,17 +221,17 @@ class Database extends PDO
             $sth = self::getPDO()->prepare($query);
             $sth->bindValue(":id", $id, PDO::PARAM_INT);
             if (!$sth->execute()) {
-                throw new Exception("Fatal Error at deleting this item", 500);
+                throw new Exception("Fatal Error at deleting this item", HttpCode::INTERNAL_SERVER_ERROR);
             }
             if ($sth->rowCount() != 1) {
-                throw new Exception("Fatal Error at deleting. To many results", 500);
+                throw new Exception("Fatal Error at deleting. To many results", HttpCode::INTERNAL_SERVER_ERROR);
             }
             self::getPDO()->commit();
             return true;
         } catch (\Throwable $th) {
 
             self::getPDO()->rollBack();
-            throw new Exception($th->getMessage(), 500);
+            throw new Exception($th->getMessage(), HttpCode::INTERNAL_SERVER_ERROR);
         }
     }
 

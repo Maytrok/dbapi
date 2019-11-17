@@ -10,7 +10,7 @@ use dbapi\exception\NotAuthorizedException;
 use dbapi\exception\NotFoundException;
 use dbapi\interfaces\ModelProps;
 use dbapi\interfaces\RestrictedView;
-
+use dbapi\tools\HttpCode;
 
 class Api extends ApiSimple
 {
@@ -172,15 +172,15 @@ class Api extends ApiSimple
      * @throws Exception Exception
      * @return bool
      */
-    private function saveModel($statuscode = 200)
+    private function saveModel($statuscode = HttpCode::OK)
     {
         $res = $this->model->save();
         if ($res === false) {
-            throw new Exception("Database Exception", 500);
+            throw new Exception("Database Exception", HttpCode::INTERNAL_SERVER_ERROR);
         } else if (is_numeric($res)) {
 
-            if ($statuscode != 200) {
-                http_response_code(201);
+            if ($statuscode != HttpCode::OK) {
+                http_response_code(HttpCode::CREATED);
             };
             $res = Database::get($this->modelDb, $this->modelTable, $this->model->getId());
             $this->view->setMainData($res);
@@ -263,7 +263,7 @@ class Api extends ApiSimple
     private function removeMethodFromArray($method)
     {
         if (!in_array($method, $this->availableMethods)) {
-            throw new Exception("Methode is not included in the Array. Please make sure you add a '_' before the Method name", 500);
+            throw new Exception("Methode is not included in the Array. Please make sure you add a '_' before the Method name", HttpCode::INTERNAL_SERVER_ERROR);
         }
         array_splice($this->availableMethods, array_search($method, $this->availableMethods), 1);
     }
@@ -317,7 +317,7 @@ class Api extends ApiSimple
     public function hookAuth($fnc)
     {
         if (!is_callable($fnc)) {
-            throw new Exception("Parameter has to be an Funktion", 500);
+            throw new Exception("Parameter has to be an Funktion", HttpCode::INTERNAL_SERVER_ERROR);
         }
         $this->_hook_checkAuth = $fnc;
     }
@@ -331,7 +331,7 @@ class Api extends ApiSimple
     public function hookSpecialGet($fnc)
     {
         if (!is_callable($fnc)) {
-            throw new Exception("Parameter has to be an Funktion", 500);
+            throw new Exception("Parameter has to be an Funktion", HttpCode::INTERNAL_SERVER_ERROR);
         }
         $this->_hook_special_get = $fnc;
     }
@@ -347,7 +347,7 @@ class Api extends ApiSimple
     protected function isMethodAllowed($method)
     {
         if (!in_array("_" . strtolower($method), $this->availableMethods)) {
-            throw new Exception("Request Method not Allowed", 405);
+            throw new Exception("Request Method not Allowed", HttpCode::METHOD_NOT_ALLOWED);
         }
     }
 

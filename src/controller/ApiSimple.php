@@ -82,7 +82,7 @@ class ApiSimple
     {
 
         if (!is_callable($func)) {
-            throw new Exception("Argument must be an function", 500);
+            throw new Exception("Argument must be an function", HttpCode::INTERNAL_SERVER_ERROR);
         }
         if (count($requiredParams) != 0) {
             $this->requiredParams["get"] = $requiredParams;
@@ -93,7 +93,7 @@ class ApiSimple
     {
 
         if (!is_callable($func)) {
-            throw new Exception("Argument must be an function", 500);
+            throw new Exception("Argument must be an function", HttpCode::INTERNAL_SERVER_ERROR);
         }
         if (count($requiredParams) != 0) {
             $this->requiredParams["post"] = $requiredParams;
@@ -104,7 +104,7 @@ class ApiSimple
     {
 
         if (!is_callable($func)) {
-            throw new Exception("Argument must be an function", 500);
+            throw new Exception("Argument must be an function", HttpCode::INTERNAL_SERVER_ERROR);
         }
 
         if (count($requiredParams) != 0) {
@@ -116,7 +116,7 @@ class ApiSimple
     {
 
         if (!is_callable($func)) {
-            throw new Exception("Argument must be an function", 500);
+            throw new Exception("Argument must be an function", HttpCode::INTERNAL_SERVER_ERROR);
         }
         if (count($requiredParams) != 0) {
             $this->requiredParams["delete"] = $requiredParams;
@@ -275,7 +275,7 @@ class ApiSimple
     public function hookOutput($fnc)
     {
         if (!is_callable($fnc)) {
-            throw new Exception("Parameter has to be an Funktion", 500);
+            throw new Exception("Parameter has to be an Funktion", HttpCode::INTERNAL_SERVER_ERROR);
         }
         $this->_hook_output = $fnc;
     }
