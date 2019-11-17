@@ -8,7 +8,13 @@ use php\klassen\User;
 include __DIR__ . "/../bin/basic.php";
 
 // DB Init
-Database::open(new EnvReader(__DIR__));
+try {
+    Database::open(new EnvReader(__DIR__));
+} catch (\Throwable $th) {
+    // Fatal Error with the Database Connection
+    App::$looger->emergency("Connection to Database failed!");
+    exit();
+}
 
 include_once __DIR__ . '/../../autoload.php';
 include_once __DIR__ . '/class/basic/UsersBasic.php';

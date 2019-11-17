@@ -15,7 +15,13 @@ include __DIR__ . "/../bin/basic.php";
 // App::$DEBUG = true;
 
 // DB Init
-Database::open(new EnvReader(__DIR__));
+try {
+    Database::open(new EnvReader(__DIR__));
+} catch (\Throwable $th) {
+    // Fatal Error with the Database Connection
+    App::$looger->emergency("Connection to Database failed!");
+    exit();
+}
 
 // Alternative open with credentials
 // Database::openConnection("myUser", "5up3r53cr37");
