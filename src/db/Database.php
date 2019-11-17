@@ -8,6 +8,7 @@ use Exception;
 use dbapi\tools\EnvReader;
 use dbapi\tools\HttpCode;
 use dbapi\tools\Utils;
+use PDOException;
 
 class Database extends PDO
 {
@@ -16,12 +17,23 @@ class Database extends PDO
 
     public static $throwExceptionOnNotFound = false;
 
+
+    /**
+     * @param string $user
+     * @param string $password
+     * @param string server = localhost
+     * @throws PDOException
+     */
     public static function openConnection($user, $password, $server = "localhost")
     {
         $opt = [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC];
         self::$connection = new PDO("mysql:host=" . $server . ";charset=utf8", $user,  $password, $opt);
     }
 
+    /**
+     * @param EnvReader
+     * @throws PDOException
+     */
     public static function open($reader)
     {
         $env = $reader == null ? new EnvReader() : $reader;
@@ -34,6 +46,7 @@ class Database extends PDO
 
     /**
      * @param EnvReader $reader
+     * @throws PDOException
      * @return PDO
      */
     public static function getPDO($reader = null)
@@ -47,7 +60,10 @@ class Database extends PDO
     }
     /**
      * Init mit ID
+     * @param string $db
+     * @param string $table
      * @param int $id
+     * @throws NotFoundException
      * @return array
      */
     public static function get($db, $table, $id)
@@ -65,6 +81,12 @@ class Database extends PDO
         return $res;
     }
 
+    /**
+     * @param string $db
+     * @param string $table
+     * @throws NotFoundException
+     * @return array
+     */
     public static function getAll($db, $table, $limit = null, $page = null)
     {
         $query = "SELECT * from " . $db . "." . $table;
@@ -88,9 +110,12 @@ class Database extends PDO
      * @param string $db Databasename
      * @param string $table Tablename
      * @param array $where 
+     * @param int $limit 
+     * @param int $page 
+     * @throws Exception
      * @return array
      */
-    public static function where($db, $table, $where, $limit = null, $page = null)
+    public static function where($db, $table, $where, $limit = 0, $page = 0)
     {
 
         $query = "SELECT * from " . $db . "." . $table . " where ";
@@ -110,7 +135,7 @@ class Database extends PDO
         $query .= substr($qusub, 4);
 
 
-        if ($limit && $page) {
+        if ($limit > 0 && $page > 0) {
             $query .= self::handleLimit($limit, $page);
         }
 
@@ -124,6 +149,11 @@ class Database extends PDO
         return $sth->fetchAll();
     }
 
+    /**
+     * @param string $db Databasename
+     * @param string $table Tablename
+     * @param array $where
+     */
     public static function countResults($db, $table, $where = null)
     {
         $query = "select count(*) count from " . $db . "." . $table;
@@ -148,6 +178,11 @@ class Database extends PDO
 
         return $sth->fetch()['count'];
     }
+    /**
+     * @param string $db Databasename
+     * @param string $table Tablename
+     * @param array $arr
+     */
 
     public static function create($db, $table, array $arr)
     {
@@ -184,6 +219,13 @@ class Database extends PDO
         }
     }
 
+    /**
+     * @param string $db Databasename
+     * @param string $table Tablename
+     * @param array $arr
+     * @param int id
+     * @return bool|int
+     */
     public static function update($db, $table, array $arr, $id)
     {
         $query = "UPDATE " . $db . "." . $table .  " SET ";
@@ -212,6 +254,14 @@ class Database extends PDO
         }
     }
 
+    /**
+     * @param string $db Databasename
+     * @param string $table Tablename
+     * @param array $arr
+     * @param int id
+     * @throws Exception
+     * @return bool|int
+     */
     public static function delete($db, $table, $id)
     {
 
