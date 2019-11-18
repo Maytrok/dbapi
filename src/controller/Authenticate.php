@@ -5,6 +5,7 @@ namespace dbapi\controller;
 use dbapi\exception\NotAuthorizedException;
 use Exception;
 use dbapi\interfaces\Authenticate as DbapiAuthenticate;
+use dbapi\tools\App;
 
 class Authenticate extends APISimple
 {
@@ -31,6 +32,8 @@ class Authenticate extends APISimple
             if (false !== $res) {
                 $this->view->setData($res);
             } else {
+
+                App::$looger->notice("Login failed");
                 $this->view->error(new NotAuthorizedException("User unknown or Password is wrong"));
             }
         }, ['user', "password"]);

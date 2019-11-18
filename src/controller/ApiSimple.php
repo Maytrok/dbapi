@@ -6,6 +6,7 @@ use Exception;
 use dbapi\exception\BadRequestException;
 use dbapi\exception\RequestMethodNotAllowedException;
 use dbapi\interfaces\DefaultView;
+use dbapi\tools\App;
 use dbapi\views\DefaultView as DbapiDefaultView;
 
 class ApiSimple
@@ -37,8 +38,12 @@ class ApiSimple
 
     protected function get()
     {
-        if (!$this->_get)
+        if (!$this->_get) {
+
+
+            App::$looger->notice("GET Method IS NOT ALLOWED");
             throw new RequestMethodNotAllowedException();
+        }
 
         $this->checkRequiredParams("get", $_GET);
         call_user_func($this->_get);
@@ -46,27 +51,34 @@ class ApiSimple
 
     protected function post()
     {
-        if (!$this->_post)
+        if (!$this->_post) {
+            App::$looger->notice("POST Method IS NOT ALLOWED");
             throw new RequestMethodNotAllowedException();
+        }
 
-        $params = array_merge($_POST, $this->getParamBody());
+
+        $params = array_merge($_POST, ApiSimple::getParamBody());
         $this->checkRequiredParams("post", $params);
         call_user_func($this->_post, $params);
     }
     protected function patch()
     {
-        if (!$this->_patch)
+        if (!$this->_patch) {
+            App::$looger->notice("PATCH Method IS NOT ALLOWED");
             throw new RequestMethodNotAllowedException();
-        $params = $this->getParamBody();
+        }
+        $params = ApiSimple::getParamBody();
         $this->checkRequiredParams("patch", $params);
         call_user_func($this->_patch, $params);
     }
     protected function delete()
     {
-        if (!$this->_delete)
+        if (!$this->_delete) {
+            App::$looger->notice("DELETE Method IS NOT ALLOWED");
             throw new RequestMethodNotAllowedException();
+        }
 
-        $params = $this->getParamBody();
+        $params = ApiSimple::getParamBody();
         $this->checkRequiredParams("delete", $params);
         call_user_func($this->_delete, $params);
     }
@@ -162,23 +174,23 @@ class ApiSimple
         header('Content-Type: application/json');
     }
 
-    public function getParamBody()
+    public static function getParamBody()
     {
-        return $this->parse(file_get_contents("php://input"));
+        return self::parse(file_get_contents("php://input"));
     }
 
 
     /**
      * Parst den Input. Entweder key/value oder ein json string
      * @param string $string
-     * @return array
+     * @return array|null
      * @throws Exception
      */
-    public function parse($string)
+    public static function parse($string)
     {
 
         if (strlen($string) == 0) {
-            throw new BadRequestException("No Arguments were given");
+            return [];
         }
         if (key_exists('Content-Type', getallheaders())) {
 

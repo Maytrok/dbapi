@@ -10,6 +10,7 @@ use dbapi\exception\NotAuthorizedException;
 use dbapi\exception\NotFoundException;
 use dbapi\interfaces\ModelProps;
 use dbapi\interfaces\RestrictedView;
+use dbapi\tools\App;
 use dbapi\tools\HttpCode;
 
 class Api extends ApiSimple
@@ -41,6 +42,8 @@ class Api extends ApiSimple
 
     protected function get()
     {
+
+        App::$looger->debug("GET Request was called", ["GET PARMS" => $_GET, "Request IP" => $_SERVER['REMOTE_ADDR']]);
 
         $this->isMethodAllowed("get");
 
@@ -115,7 +118,8 @@ class Api extends ApiSimple
     protected function post()
     {
         $this->isMethodAllowed("post");
-        $in = array_merge($_POST, $this->getParamBody());
+        $in = array_merge($_POST, ApiSimple::getParamBody());
+        App::$looger->debug("POST Request");
         $this->checkParams($in);
         $this->model->setProperties($in);
         $this->checkAuth();
