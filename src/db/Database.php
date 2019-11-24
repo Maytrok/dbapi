@@ -3,6 +3,7 @@
 namespace dbapi\db;
 
 use dbapi\exception\NotFoundException;
+use dbapi\tools\App;
 use PDO;
 use Exception;
 use dbapi\tools\EnvReader;
@@ -121,6 +122,7 @@ class Database extends PDO
         $query = "SELECT * from " . $db . "." . $table . " where ";
 
         if (!is_array($where)) {
+            App::$looger->critical("Where Param has to be an array");
             throw new Exception("Where Param has to be an array", HttpCode::INTERNAL_SERVER_ERROR);
         }
 
@@ -182,6 +184,7 @@ class Database extends PDO
      * @param string $db Databasename
      * @param string $table Tablename
      * @param array $arr
+     * @throws PDOException
      */
 
     public static function create($db, $table, array $arr)
@@ -213,6 +216,7 @@ class Database extends PDO
             $sth->bindValue(":" . $key, $prop);
         }
         if ($sth->execute()) {
+            App::$looger->info("Row created", ["query" => $query, "parms" => $arr]);
             return self::getPDO()->lastInsertId();
         } else {
             return false;
@@ -224,7 +228,7 @@ class Database extends PDO
      * @param string $table Tablename
      * @param array $arr
      * @param int $id
-     * @return bool|int
+     * @return int
      */
     public static function update($db, $table, array $arr, $id)
     {
@@ -248,8 +252,9 @@ class Database extends PDO
         $sth->bindValue(":id", $id, PDO::PARAM_INT);
 
         if (!$sth->execute()) {
-            return false;
+            return 0;
         } else {
+            App::$looger->info("Row update", ["query" => $query, "parms" => $arr, "id" => $id]);
             return $sth->rowCount();
         }
     }
@@ -270,14 +275,16 @@ class Database extends PDO
             $sth = self::getPDO()->prepare($query);
             $sth->bindValue(":id", $id, PDO::PARAM_INT);
             if (!$sth->execute()) {
+                App::$looger->error("Fatal Error at deleting this item", ["query" => $query, "id" => $id]);
                 throw new Exception("Fatal Error at deleting this item", HttpCode::INTERNAL_SERVER_ERROR);
             }
             if ($sth->rowCount() != 1) {
+                App::$looger->error("Fatal Error at deleting. To many results", ["query" => $query, "id" => $id]);
                 throw new Exception("Fatal Error at deleting. To many results", HttpCode::INTERNAL_SERVER_ERROR);
             }
             self::getPDO()->commit();
             return true;
-        } catch (\Throwable $th) {
+        } catch (\Exception $th) {
 
             self::getPDO()->rollBack();
             throw new Exception($th->getMessage(), HttpCode::INTERNAL_SERVER_ERROR);

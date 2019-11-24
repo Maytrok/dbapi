@@ -42,8 +42,6 @@ class ApiSimple
     {
         if (!$this->_get) {
 
-
-            App::$looger->notice("GET Method IS NOT ALLOWED");
             throw new RequestMethodNotAllowedException();
         }
 
@@ -54,7 +52,6 @@ class ApiSimple
     protected function post()
     {
         if (!$this->_post) {
-            App::$looger->notice("POST Method IS NOT ALLOWED");
             throw new RequestMethodNotAllowedException();
         }
 
@@ -66,7 +63,6 @@ class ApiSimple
     protected function patch()
     {
         if (!$this->_patch) {
-            App::$looger->notice("PATCH Method IS NOT ALLOWED");
             throw new RequestMethodNotAllowedException();
         }
         $params = ApiSimple::getParamBody();
@@ -76,7 +72,6 @@ class ApiSimple
     protected function delete()
     {
         if (!$this->_delete) {
-            App::$looger->notice("DELETE Method IS NOT ALLOWED");
             throw new RequestMethodNotAllowedException();
         }
 
@@ -96,6 +91,7 @@ class ApiSimple
     {
 
         if (!is_callable($func)) {
+            App::$looger->critical("Argument must be an function");
             throw new Exception("Argument must be an function", HttpCode::INTERNAL_SERVER_ERROR);
         }
         if (count($requiredParams) != 0) {
@@ -107,6 +103,7 @@ class ApiSimple
     {
 
         if (!is_callable($func)) {
+            App::$looger->critical("Argument must be an function");
             throw new Exception("Argument must be an function", HttpCode::INTERNAL_SERVER_ERROR);
         }
         if (count($requiredParams) != 0) {
@@ -118,6 +115,7 @@ class ApiSimple
     {
 
         if (!is_callable($func)) {
+            App::$looger->critical("Argument must be an function");
             throw new Exception("Argument must be an function", HttpCode::INTERNAL_SERVER_ERROR);
         }
 
@@ -130,6 +128,7 @@ class ApiSimple
     {
 
         if (!is_callable($func)) {
+            App::$looger->critical("Argument must be an function");
             throw new Exception("Argument must be an function", HttpCode::INTERNAL_SERVER_ERROR);
         }
         if (count($requiredParams) != 0) {
@@ -143,15 +142,19 @@ class ApiSimple
         try {
             switch ($_SERVER['REQUEST_METHOD']) {
                 case 'GET':
+                    App::$looger->debug("GET Request");
                     $this->get();
                     break;
                 case "POST":
+                    App::$looger->debug("POST Request");
                     $this->post();
                     break;
                 case 'PATCH':
+                    App::$looger->info("PATCH Request");
                     $this->patch();
                     break;
                 case 'DELETE':
+                    App::$looger->notice("DELETE Request");
                     $this->delete();
                     break;
                 case 'OPTIONS':
@@ -183,7 +186,6 @@ class ApiSimple
 
 
     /**
-     * Parst den Input. Entweder key/value oder ein json string
      * @param string $string
      * @return array|null
      * @throws Exception
@@ -223,17 +225,12 @@ class ApiSimple
 
         if (count($this->proxyGetParams) == 0) {
             foreach ($_GET as $key => $value) {
-
-                //Ignore id
                 if (in_array($key, $this->reservedQueryParams)) {
                     continue;
                 }
-
-
                 $this->proxyGetParams[$key] =  $value;
             }
         }
-
         return $this->proxyGetParams;
     }
 
@@ -289,6 +286,7 @@ class ApiSimple
     public function hookOutput($fnc)
     {
         if (!is_callable($fnc)) {
+            App::$looger->critical("Parameter has to be an Funktion");
             throw new Exception("Parameter has to be an Funktion", HttpCode::INTERNAL_SERVER_ERROR);
         }
         $this->_hook_output = $fnc;

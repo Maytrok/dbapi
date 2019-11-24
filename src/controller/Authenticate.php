@@ -19,6 +19,7 @@ class Authenticate extends APISimple
 
         parent::__construct();
         if (!$model instanceof DbapiAuthenticate) {
+            App::$looger->critical("Model in Authenticate has to be an instance of Authenticate Model");
             $this->view->error(new Exception("Model in Authenticate has to be an instance of Authenticate Model", 500));
         }
         $this->model = $model;
@@ -45,6 +46,7 @@ class Authenticate extends APISimple
         if ($this->model->logout()) {
             $this->view->setData(["msg" => "successfully logged out"]);
         } else {
+            App::$looger->notice("Logout failed");
             $this->view->error(new Exception("Error on Logout", HttpCode::INTERNAL_SERVER_ERROR));
         }
     }

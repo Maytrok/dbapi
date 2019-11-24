@@ -42,9 +42,6 @@ class Api extends ApiSimple
 
     protected function get()
     {
-
-        App::$looger->debug("GET Request was called", ["GET PARMS" => $_GET, "Request IP" => $_SERVER['REMOTE_ADDR']]);
-
         $this->isMethodAllowed("get");
 
         if ($this->getSpecialParam() != '' && $this->_hook_special_get != null) {
@@ -52,7 +49,6 @@ class Api extends ApiSimple
 
             return;
         }
-
         // Single
         if (isset($_GET['id'])) {
 
@@ -119,7 +115,6 @@ class Api extends ApiSimple
     {
         $this->isMethodAllowed("post");
         $in = array_merge($_POST, ApiSimple::getParamBody());
-        App::$looger->debug("POST Request");
         $this->checkParams($in);
         $this->model->setProperties($in);
         $this->checkAuth();
@@ -156,7 +151,7 @@ class Api extends ApiSimple
     }
 
     /**
-     * Laed die Instanz
+     * Init
      * @param int $id
      * @throws NotFoundException Exception
      */
@@ -165,6 +160,7 @@ class Api extends ApiSimple
         $this->model->get($id);
 
         if (!$this->model->isInitSuccess()) {
+            App::$looger->debug("Model was not Found");
             throw new NotFoundException();
         }
     }
@@ -172,20 +168,27 @@ class Api extends ApiSimple
 
 
     /**
-     * Speichert ein neues Modell ab
+     * Save the Model
      * @throws Exception Exception
      * @return bool
      */
     private function saveModel($statuscode = HttpCode::OK)
     {
-        $res = $this->model->save();
-        if ($res === false) {
+        try {
+            $res = $this->model->save();
+        } catch (\Exception $th) {
+            App::$looger->error("An error occurred during the creation of an new DB entry");
             throw new Exception("Database Exception", HttpCode::INTERNAL_SERVER_ERROR);
-        } else if (is_numeric($res)) {
+        }
+
+        if (is_numeric($res)) {
 
             if ($statuscode != HttpCode::OK) {
+                App::$looger->info("New Model was created");
                 http_response_code(HttpCode::CREATED);
-            };
+            } else {
+                App::$looger->info("New Model was updated");
+            }
             $res = Database::get($this->modelDb, $this->modelTable, $this->model->getId());
             $this->view->setMainData($res);
             return true;
@@ -215,14 +218,14 @@ class Api extends ApiSimple
 
     /**
      * Wurde die ID richtig gesetzt
-     * @return int $id
+     * @return int|mixed $id
      * @throws Exception
      */
     private function getRequestID()
     {
         if (isset($_GET['id'])) {
 
-            if (!is_int($_GET['id'])) {
+            if (!is_numeric($_GET['id'])) {
                 throw new BadRequestException("Malformed ID");
             } else
                 return $_GET['id'];
@@ -267,6 +270,7 @@ class Api extends ApiSimple
     private function removeMethodFromArray($method)
     {
         if (!in_array($method, $this->availableMethods)) {
+            App::$looger->critical("Methode is not included in the Array. Please make sure you add a '_' before the Method name");
             throw new Exception("Methode is not included in the Array. Please make sure you add a '_' before the Method name", HttpCode::INTERNAL_SERVER_ERROR);
         }
         array_splice($this->availableMethods, array_search($method, $this->availableMethods), 1);
@@ -275,6 +279,7 @@ class Api extends ApiSimple
     private function handleMultipleResults($res)
     {
         if (count($res) == 0) {
+            App::$looger->debug("No matching resources found");
             throw new NotFoundException("No matching resources found");
         }
 
@@ -311,6 +316,7 @@ class Api extends ApiSimple
             if ($this->model instanceof RestrictedView && $this->authvalue != null) {
 
                 if ($this->model->restrictedValue() != $this->authvalue) {
+
                     throw new NotAuthorizedException();
                 }
             }
@@ -322,6 +328,7 @@ class Api extends ApiSimple
     {
 
         if (!is_callable($fnc)) {
+            App::$looger->critical("Parameter has to be an Funktion");
             throw new Exception("Parameter has to be an Funktion", HttpCode::INTERNAL_SERVER_ERROR);
         }
         $this->_hook_checkAuth = $fnc;
@@ -336,6 +343,7 @@ class Api extends ApiSimple
     public function hookSpecialGet($fnc)
     {
         if (!is_callable($fnc)) {
+            App::$looger->critical("Parameter has to be an Funktion");
             throw new Exception("Parameter has to be an Funktion", HttpCode::INTERNAL_SERVER_ERROR);
         }
         $this->_hook_special_get = $fnc;
@@ -352,6 +360,7 @@ class Api extends ApiSimple
     protected function isMethodAllowed($method)
     {
         if (!in_array("_" . strtolower($method), $this->availableMethods)) {
+            App::$looger->warning($method . " Method was request but not allowed");
             throw new Exception("Request Method not Allowed", HttpCode::METHOD_NOT_ALLOWED);
         }
     }

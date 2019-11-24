@@ -7,6 +7,7 @@ use Exception;
 use dbapi\interfaces\ModelProps;
 use dbapi\db\Database;
 use dbapi\exception\NotFoundException;
+use dbapi\tools\App;
 use dbapi\tools\HttpCode;
 
 /**
@@ -59,9 +60,7 @@ abstract class ModelBasic
             throw new NotFoundException($this->noRessourceFound());
         }
 
-        foreach ($result as $key => $value) {
-            $this->$key = $value;
-        }
+        $this->setProperties($result);
 
         return $this->initSuccess = true;
     }
@@ -74,15 +73,18 @@ abstract class ModelBasic
         }
     }
 
+    /**
+     * Create or Update the Model
+     * @throws Exception
+     * @return mixed ID or number of Rows updated. 0 on fail
+     */
     public function save()
     {
 
         if ($this->id != 0) {
             // Update
-
             return Database::update($this::getDB(), $this::getTableName(), $this->getPropsArray(), $this->id);
         } else {
-
             // Alles gesetzt
             $this->isAllSet();
 
@@ -115,6 +117,7 @@ abstract class ModelBasic
 
         foreach ($required as $value) {
             if ($this->$value == null || $this->$value == "") {
+                App::$looger->info("Nicht alle Props gesetzt", $this->getPropsArray());
                 throw new Exception("Es wurden nicht alle Props fuer die die Instanz gesetzt. Speichern nocht moeglich " . $value, 500);
             }
         }

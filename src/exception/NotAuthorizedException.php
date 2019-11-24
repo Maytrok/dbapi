@@ -2,6 +2,7 @@
 
 namespace dbapi\exception;
 
+use dbapi\tools\App;
 use dbapi\tools\HttpCode;
 use Exception;
 
@@ -11,6 +12,7 @@ class NotAuthorizedException extends Exception
     {
 
         $message = $message ? $message : "Not Authorized";
+        App::$looger->notice($message);
         parent::__construct($message, HttpCode::UNAUTHORIZED);
     }
 }
