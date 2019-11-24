@@ -18,7 +18,7 @@ class Utils
             if (is_array($value)) {
                 $array[$key] = Utils::utf8encodeArray($value);
             } elseif (!mb_detect_encoding($value, 'UTF-8', true)) {
-                $array[$key] = Utils::utf8_encode($value);
+                $array[$key] = Utils::utf8encodeArray($value);
             }
         }
 

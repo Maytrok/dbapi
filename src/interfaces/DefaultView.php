@@ -8,12 +8,12 @@ interface DefaultView
 {
 
     /**
-     * @param Exception
+     * @param Exception $th
      */
     public function error(Exception $th);
     public function output();
     /**
-     * @param array
+     * @param array $array
      */
     public function setMainData($array);
     /**
@@ -21,7 +21,7 @@ interface DefaultView
      */
     public function getMainData();
     /**
-     * @param array
+     * @param array $array
      */
     public function setData($array);
     public function setEncoding();

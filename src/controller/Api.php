@@ -10,6 +10,7 @@ use dbapi\exception\NotAuthorizedException;
 use dbapi\exception\NotFoundException;
 use dbapi\interfaces\ModelProps;
 use dbapi\interfaces\RestrictedView;
+use dbapi\tools\App;
 use dbapi\tools\HttpCode;
 
 class Api extends ApiSimple
@@ -41,6 +42,8 @@ class Api extends ApiSimple
 
     protected function get()
     {
+
+        App::$looger->debug("GET Request was called", ["GET PARMS" => $_GET, "Request IP" => $_SERVER['REMOTE_ADDR']]);
 
         $this->isMethodAllowed("get");
 
@@ -115,7 +118,8 @@ class Api extends ApiSimple
     protected function post()
     {
         $this->isMethodAllowed("post");
-        $in = array_merge($_POST, $this->getParamBody());
+        $in = array_merge($_POST, ApiSimple::getParamBody());
+        App::$looger->debug("POST Request");
         $this->checkParams($in);
         $this->model->setProperties($in);
         $this->checkAuth();
@@ -218,10 +222,10 @@ class Api extends ApiSimple
     {
         if (isset($_GET['id'])) {
 
-            if (!is_numeric($_GET['id'])) {
+            if (!is_int($_GET['id'])) {
                 throw new BadRequestException("Malformed ID");
-            }
-            return $_GET['id'];
+            } else
+                return $_GET['id'];
         } else {
             throw new BadRequestException("No ID submitted");
         }
@@ -316,6 +320,7 @@ class Api extends ApiSimple
 
     public function hookAuth($fnc)
     {
+
         if (!is_callable($fnc)) {
             throw new Exception("Parameter has to be an Funktion", HttpCode::INTERNAL_SERVER_ERROR);
         }
@@ -323,10 +328,10 @@ class Api extends ApiSimple
     }
 
     /**
-     * @param function
      * The Lamba function has to return the View given in the 1.param
      * 1 Param DefaultView
      * 2 Param the special request param
+     * @param callable $fnc
      */
     public function hookSpecialGet($fnc)
     {

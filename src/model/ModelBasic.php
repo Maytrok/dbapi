@@ -48,7 +48,7 @@ abstract class ModelBasic
 
 
     /**
-     * @param int
+     * @param int $id
      * @throws Exception
      * @return bool
      */
@@ -123,7 +123,7 @@ abstract class ModelBasic
     /**
      * @param array $params
      * @throws Exception
-     * @return array
+     * @return bool
      */
     public function where($params)
     {

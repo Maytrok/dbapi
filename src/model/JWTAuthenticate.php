@@ -16,7 +16,7 @@ abstract class JWTAuthenticate extends ModelBasic implements Authenticate
 
     protected $jwt = null;
 
-    private static $id = null;
+    private static $id_static = null;
 
     private static $model = null;
 
@@ -29,18 +29,18 @@ abstract class JWTAuthenticate extends ModelBasic implements Authenticate
         try {
             $session_error = "Keine gültige Sitzung";
             if (!key_exists("JWT", getallheaders())) {
-                throw new NoValidSessionException("No JWT Header was submitted", HttpCode::FORBIDDEN);
+                throw new NoValidSessionException("No JWT Header was submitted");
             };
             $jwt = getallheaders()["JWT"];
             if (strlen($jwt) == 0) {
-                throw new NoValidSessionException($session_error, HttpCode::FORBIDDEN);
+                throw new NoValidSessionException($session_error);
             }
 
             $dec = JWT::decode(getallheaders()["JWT"], $this->getJWTKeySecret(), array('HS256'));
             $this->get($dec->userid);
-            self::$id = $this->getId();
+            self::$id_static = $this->getId();
             if ($jwt != $this->getJwt()) {
-                throw new NoValidSessionException($session_error, HttpCode::FORBIDDEN);
+                throw new NoValidSessionException($session_error);
             }
 
             // If instance of Restricted View the Result will be affected
@@ -121,6 +121,6 @@ abstract class JWTAuthenticate extends ModelBasic implements Authenticate
 
     public static function getAuthUserId()
     {
-        return self::$id;
+        return self::$id_static;
     }
 }
