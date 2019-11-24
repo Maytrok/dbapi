@@ -85,7 +85,7 @@ use dbapi\interfaces\ModelProps;";
         ";
 
     if ($this->config['interface']) {
-      $this->requiredProps($fields);
+      $this->requiredProps();
     }
 
     if ($this->config['getter']) {
@@ -109,7 +109,7 @@ use dbapi\interfaces\ModelProps;";
 
       $path = $this->config['abstract'] ? $this->config['path'] . "basic/" . ucfirst($this->tbname) . "Basic" : $this->config['path'] . ucfirst($this->tbname);
 
-      $this->createPath($path);
+      $this->createPath();
 
       $handle = fopen($path . ".php", $this->config['abstract'] ? 'w' : 'x');
       fwrite($handle, $this->body);

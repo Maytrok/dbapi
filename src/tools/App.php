@@ -10,7 +10,7 @@ class App
 
     public static $DEBUG = false;
 
-    private static $logpath = __DIR__ . "..\\..\\..\\..\\..\\dbapi.log";
+    private static $logpath = "";
 
     private static $loglevel = Logger::ERROR;
 
@@ -21,7 +21,7 @@ class App
 
     public static final function getLogPath()
     {
-        return self::$logpath;
+        return self::$logpath == "" ? __DIR__ . "..\\..\\..\\..\\..\\dbapi.log" : self::$logpath;
     }
 
     public static final function setLogPath($logpath)

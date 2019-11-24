@@ -12,7 +12,7 @@ class ClassGeneratorDB
         Database::getPDO()->exec("use " . $db);
         foreach (Database::getPDO()->query("SHOW TABLES") as $value) {
 
-            new ClassGenerator($value['Tables_in_' . $db], $db, $config);
+            $res = new ClassGenerator($value['Tables_in_' . $db], $db, $config);
         }
     }
 }

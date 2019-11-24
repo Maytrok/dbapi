@@ -6,6 +6,7 @@ use dbapi\exception\NotAuthorizedException;
 use Exception;
 use dbapi\interfaces\Authenticate as DbapiAuthenticate;
 use dbapi\tools\App;
+use dbapi\tools\HttpCode;
 
 class Authenticate extends APISimple
 {

@@ -7,6 +7,7 @@ use dbapi\exception\BadRequestException;
 use dbapi\exception\RequestMethodNotAllowedException;
 use dbapi\interfaces\DefaultView;
 use dbapi\tools\App;
+use dbapi\tools\HttpCode;
 use dbapi\views\DefaultView as DbapiDefaultView;
 
 class ApiSimple
@@ -20,6 +21,7 @@ class ApiSimple
     protected $requiredParams = [];
 
     protected $_hook_output = null;
+
 
     public static $DELETE = "_delete";
     public static $POST = "_post";

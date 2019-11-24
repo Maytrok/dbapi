@@ -21,7 +21,7 @@ class Database extends PDO
     /**
      * @param string $user
      * @param string $password
-     * @param string server = localhost
+     * @param string $server  localhost
      * @throws PDOException
      */
     public static function openConnection($user, $password, $server = "localhost")
@@ -31,7 +31,7 @@ class Database extends PDO
     }
 
     /**
-     * @param EnvReader
+     * @param EnvReader $reader
      * @throws PDOException
      */
     public static function open($reader)
@@ -223,7 +223,7 @@ class Database extends PDO
      * @param string $db Databasename
      * @param string $table Tablename
      * @param array $arr
-     * @param int id
+     * @param int $id
      * @return bool|int
      */
     public static function update($db, $table, array $arr, $id)
@@ -257,8 +257,7 @@ class Database extends PDO
     /**
      * @param string $db Databasename
      * @param string $table Tablename
-     * @param array $arr
-     * @param int id
+     * @param int $id
      * @throws Exception
      * @return bool|int
      */
