@@ -10,7 +10,9 @@ include __DIR__ . "/../bin/basic.php";
 // DB Init
 try {
     Database::open(new EnvReader(__DIR__));
-} catch (\Throwable $th) {
+    // for older php Versions E_STRICT should be disabled
+    error_reporting(E_ERROR);
+} catch (\Exception $th) {
     // Fatal Error with the Database Connection
     App::$looger->emergency("Connection to Database failed!");
     exit();
