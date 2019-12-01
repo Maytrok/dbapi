@@ -46,22 +46,17 @@ class Api extends ApiSimple
 
         if ($this->getSpecialParam() != '' && $this->_hook_special_get != null) {
             $this->specialGet();
-
             return;
         }
         // Single
         if (isset($_GET['id'])) {
-
+            Database::$throwExceptionOnNotFound = true;
             if ($this->model instanceof RestrictedView) {
-
-                Database::$throwExceptionOnNotFound = true;
-
                 $result = Database::get($this->modelDb, $this->modelTable, $this->getRequestID());
                 if (count($this->getAdditionalGetParams()) != 0) {
                     if ($result[$this->model->restrictedKey()] != $this->getAdditionalGetParams()[$this->model->restrictedKey()]) {
                         throw new NotAuthorizedException();
                     } else {
-
                         $this->view->setMainData($result);
                         return;
                     }
@@ -70,44 +65,25 @@ class Api extends ApiSimple
                     return;
                 }
             } else {
-                Database::$throwExceptionOnNotFound = true;
                 $this->view->setMainData(Database::get($this->modelDb, $this->modelTable, $this->getRequestID()));
                 return;
             }
-        } else if (count($this->getAdditionalGetParams()) != 0) {
-            // Specific querys
-            if ($pagination = $this->isPageination()) {
+        } else {
 
-                list($page, $per_page) = $pagination;
+            list($page, $per_page) = $this->pagination();
+
+
+            if ($this->isCountRequest()) {
+                $this->view->setData(['count' => Database::countResults($this->modelDb, $this->modelTable, $this->getAdditionalGetParams())]);
+            } else {
+                $this->handleMultipleResults(Database::where($this->modelDb, $this->modelTable, $this->getAdditionalGetParams(), $per_page, $page, $this->getSpecialFormat()));
+            }
+
+
+            if ($page > 0 && $per_page > 0) {
+
                 $count = ceil(Database::countResults($this->modelDb, $this->modelTable, $this->getAdditionalGetParams()) / $per_page);
                 $this->view->setData(["pages" => $count]);
-                $this->handleMultipleResults(Database::where($this->modelDb, $this->modelTable, $this->getAdditionalGetParams(), $per_page, $page, $this->getSpecialFormat()));
-            } else {
-                if ($this->isCountRequest()) {
-                    $this->view->setData(['count' => Database::countResults($this->modelDb, $this->modelTable, $this->getAdditionalGetParams())]);
-                    return;
-                } else {
-
-                    $this->handleMultipleResults(Database::where($this->modelDb, $this->modelTable, $this->getAdditionalGetParams(), 0, 0, $this->getSpecialFormat()));
-                    return;
-                }
-            }
-        } else {
-            if ($pagination = $this->isPageination()) {
-                list($page, $per_page) = $pagination;
-                $count = ceil(Database::countResults($this->modelDb, $this->modelTable) / $per_page);
-                $this->view->setData(["pages" => $count]);
-                $this->handleMultipleResults(Database::getAll($this->modelDb, $this->modelTable, $per_page, $page, $this->getSpecialFormat()));
-                return;
-            } else {
-
-                if ($this->isCountRequest()) {
-                    $this->view->setData(['count' => Database::countResults($this->modelDb, $this->modelTable)]);
-                    return;
-                } else {
-                    $this->handleMultipleResults(Database::getAll($this->modelDb, $this->modelTable, 0, 0, $this->getSpecialFormat()));
-                    return;
-                }
             }
         }
     }
@@ -287,7 +263,7 @@ class Api extends ApiSimple
         $this->view->setMainData($res);
     }
 
-    protected function isPageination()
+    protected function pagination()
     {
 
         if (key_exists('page', $_GET) && key_exists("per_page", $_GET)) {

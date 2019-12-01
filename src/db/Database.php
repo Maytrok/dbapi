@@ -134,34 +134,40 @@ class Database extends PDO
         if (count($column) > 0) {
             $query .=  implode(", ", $column);
         } else {
-            $query .= " *";
+            $query .= " * ";
         }
 
-        $query .= "from " . $db . "." . $table . " where ";
+        $query .= " from " . $db . "." . $table . " ";
 
         if (!is_array($where)) {
             App::$looger->critical("Where Param has to be an array");
             throw new Exception("Where Param has to be an array", HttpCode::INTERNAL_SERVER_ERROR);
         }
 
-        $parms = [];
-        $qusub = "";
+        if (count($where) > 0) {
 
-        foreach ($where as $key => $value) {
+            $query .= " where ";
+            $parms = [];
+            $qusub = "";
 
-            if (is_array($value)) {
-                list($val, $mod) = $value;
-                $parms[] = $val;
-                $qusub .= "and " . $key . $mod . " ?";
-            } else {
-                $parms[] = $value;
-                $qusub .= "and " . $key . "= ?";
+            foreach ($where as $key => $value) {
+
+                if (is_array($value)) {
+                    list($val, $mod) = $value;
+                    $parms[] = $val;
+                    $qusub .= "and " . $key . $mod . " ?";
+                } else {
+                    $parms[] = $value;
+                    $qusub .= "and " . $key . "= ?";
+                }
             }
+
+            $query .= substr($qusub, 4);
         }
 
-        $query .= substr($qusub, 4);
-
         $query .= self::handleLimit($limit, $page);
+
+        App::$looger->debug("Database WHERE: " . $query);
 
         $sth = self::getPDO()->prepare($query);
         $sth->execute($parms);
