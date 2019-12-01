@@ -85,16 +85,27 @@ class Database extends PDO
     /**
      * @param string $db
      * @param string $table
+     * @param int $limit 0 = no limit
+     * @param int $page 0 = no limit
+     * @param array $column = [] all column will shown
      * @throws NotFoundException
      * @return array
      */
-    public static function getAll($db, $table, $limit = null, $page = null)
+    public static function getAll($db, $table, $limit = 0, $page = 0, $column = [])
     {
-        $query = "SELECT * from " . $db . "." . $table;
 
-        if ($limit && $page) {
-            $query .= self::handleLimit($limit, $page);
+        $query = "SELECT ";
+        if (count($column) > 0) {
+            $query .=  implode(", ", $column);
+        } else {
+            $query .= " *";
         }
+
+        $query .= " from " . $db . "." . $table;
+
+
+        $query .= self::handleLimit($limit, $page);
+
 
         $sth = self::getPDO()->prepare($query);
         $sth->execute();
@@ -116,10 +127,17 @@ class Database extends PDO
      * @throws Exception
      * @return array
      */
-    public static function where($db, $table, $where, $limit = 0, $page = 0)
+    public static function where($db, $table, $where, $limit = 0, $page = 0, $column = [])
     {
 
-        $query = "SELECT * from " . $db . "." . $table . " where ";
+        $query = "SELECT ";
+        if (count($column) > 0) {
+            $query .=  implode(", ", $column);
+        } else {
+            $query .= " *";
+        }
+
+        $query .= "from " . $db . "." . $table . " where ";
 
         if (!is_array($where)) {
             App::$looger->critical("Where Param has to be an array");
@@ -143,10 +161,7 @@ class Database extends PDO
 
         $query .= substr($qusub, 4);
 
-
-        if ($limit > 0 && $page > 0) {
-            $query .= self::handleLimit($limit, $page);
-        }
+        $query .= self::handleLimit($limit, $page);
 
         $sth = self::getPDO()->prepare($query);
         $sth->execute($parms);
@@ -311,12 +326,17 @@ class Database extends PDO
     private static final function handleLimit($limit, $page)
     {
 
-        $offset = $page * $limit - $limit;
-        $str = " LIMIT " . $limit;
+        if ($limit > 0 && $page > 0) {
 
-        if ($offset) {
-            $str .= " OFFSET " . $offset;
+            $offset = $page * $limit - $limit;
+            $str = " LIMIT " . $limit;
+
+            if ($offset) {
+                $str .= " OFFSET " . $offset;
+            }
+            return $str;
+        } else {
+            return "";
         }
-        return $str;
     }
 }

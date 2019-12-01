@@ -230,7 +230,7 @@ class ModelBasicTest extends TestCase
             $user->save();
         }
 
-        $res = User::findWhere("name", "TestUser", "=");
+        $res = User::findWhere("name", "TestUser");
 
 
         $this->assertIsArray($res);

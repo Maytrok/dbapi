@@ -27,7 +27,7 @@ class Api extends ApiSimple
 
     private $_hook_special_get;
 
-    protected $reservedQueryParams = ['id', 'page', "per_page", "count", "special_get", "special_get_payload"];
+    protected $reservedQueryParams = ['id', 'page', "per_page", "count", "special_get", "special_get_payload", "special_format"];
 
     private $modelTable, $modelDb;
 
@@ -81,13 +81,14 @@ class Api extends ApiSimple
                 list($page, $per_page) = $pagination;
                 $count = ceil(Database::countResults($this->modelDb, $this->modelTable, $this->getAdditionalGetParams()) / $per_page);
                 $this->view->setData(["pages" => $count]);
-                $this->handleMultipleResults(Database::where($this->modelDb, $this->modelTable, $this->getAdditionalGetParams(), $per_page, $page));
+                $this->handleMultipleResults(Database::where($this->modelDb, $this->modelTable, $this->getAdditionalGetParams(), $per_page, $page, $this->getSpecialFormat()));
             } else {
                 if ($this->isCountRequest()) {
                     $this->view->setData(['count' => Database::countResults($this->modelDb, $this->modelTable, $this->getAdditionalGetParams())]);
                     return;
                 } else {
-                    $this->handleMultipleResults(Database::where($this->modelDb, $this->modelTable, $this->getAdditionalGetParams()));
+
+                    $this->handleMultipleResults(Database::where($this->modelDb, $this->modelTable, $this->getAdditionalGetParams(), 0, 0, $this->getSpecialFormat()));
                     return;
                 }
             }
@@ -96,7 +97,7 @@ class Api extends ApiSimple
                 list($page, $per_page) = $pagination;
                 $count = ceil(Database::countResults($this->modelDb, $this->modelTable) / $per_page);
                 $this->view->setData(["pages" => $count]);
-                $this->handleMultipleResults(Database::getAll($this->modelDb, $this->modelTable, $per_page, $page));
+                $this->handleMultipleResults(Database::getAll($this->modelDb, $this->modelTable, $per_page, $page, $this->getSpecialFormat()));
                 return;
             } else {
 
@@ -104,7 +105,7 @@ class Api extends ApiSimple
                     $this->view->setData(['count' => Database::countResults($this->modelDb, $this->modelTable)]);
                     return;
                 } else {
-                    $this->handleMultipleResults(Database::getAll($this->modelDb, $this->modelTable));
+                    $this->handleMultipleResults(Database::getAll($this->modelDb, $this->modelTable, 0, 0, $this->getSpecialFormat()));
                     return;
                 }
             }
@@ -293,7 +294,7 @@ class Api extends ApiSimple
 
             return [$_GET['page'], $_GET['per_page']];
         } else {
-            return false;
+            return [0, 0];
         }
     }
 
@@ -373,5 +374,26 @@ class Api extends ApiSimple
     protected function getSpecialPayload()
     {
         return isset($_GET['special_get_payload']) ? $_GET['special_get_payload'] : '';
+    }
+
+    protected function getSpecialFormat()
+    {
+
+        $res = [];
+        if (isset($_GET['special_format'])) {
+            $format = explode(",", $_GET['special_format']);
+
+            foreach ($format as $value) {
+
+                // Valid Column 
+                if (in_array($value, $this->model->getProperties())) {
+                    $res[] = $value;
+                } else {
+                    throw new BadRequestException("Wrong format request");
+                }
+            }
+        }
+
+        return $res;
     }
 }
