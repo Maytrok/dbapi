@@ -30,13 +30,14 @@ class Authenticate extends APISimple
             $password = $params['password'];
 
             $res = $this->model->login($username, $password);
-
             if (false !== $res) {
                 $this->view->setData($res);
+                return $this->view;
             } else {
 
                 App::$looger->notice("Login failed");
                 $this->view->error(new NotAuthorizedException("User unknown or Password is wrong"));
+                return $this->view;
             }
         }, ['user', "password"]);
     }

@@ -3,6 +3,7 @@
 // See also loginLogout.php
 
 use dbapi\controller\Api;
+use dbapi\controller\ApiSimple;
 use dbapi\db\Database;
 use dbapi\exception\NotAuthorizedException;
 use dbapi\tools\App;
@@ -40,21 +41,22 @@ include_once __DIR__ . '/../../autoload.php';
 $user = new User;
 $content = new Content();
 
+$api = new Api($content);
+
 /**
  * The User Model will initilized by the authentication Process. In this case with an JWT Token which has to be provided in the request header
  * If failed the Programm will quit
  * To Parse an Model into the Authentification process the Interface RestrictedView is required
  * If provided the results are Limited to the current user
  */
-$user->authenticate($content);
-$api = new Api($content);
+ApiSimple::setAuth($user);
 
 // This hook is also available without Authentication
 $api->hookAuth(function (Content $model, $REQUEST_METHOD) {
     // Does not Work for GET METHODS
 
     // denial a request method for an specific user
-    if ($REQUEST_METHOD == "POST" && User::getModel()->getName() == "someName") {
+    if ($REQUEST_METHOD == "POST" && Api::$auth->getName() == "someName") {
 
         throw new NotAuthorizedException();
     }

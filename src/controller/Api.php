@@ -300,7 +300,11 @@ class Api extends ApiSimple
         }
     }
 
-
+    /**
+     * Function 
+     *  1: Model
+     *  2: Request Method
+     */
     public function hookAuth($fnc)
     {
 
@@ -309,6 +313,20 @@ class Api extends ApiSimple
             throw new Exception("Parameter has to be an Funktion", HttpCode::INTERNAL_SERVER_ERROR);
         }
         $this->_hook_checkAuth = $fnc;
+    }
+
+
+    protected function checkAuthUser()
+    {
+        if (!is_null(self::$auth)) {
+
+            if ($this->model instanceof RestrictedView) {
+                self::$auth->authenticate($this->model);
+            } else {
+                $d = null;
+                self::$auth->authenticate($d);
+            }
+        }
     }
 
     /**

@@ -5,13 +5,21 @@ namespace dbapi\controller;
 use Exception;
 use dbapi\exception\BadRequestException;
 use dbapi\exception\RequestMethodNotAllowedException;
-use dbapi\interfaces\DefaultView;
+use dbapi\interfaces\Authenticate;
 use dbapi\tools\App;
 use dbapi\tools\HttpCode;
-use dbapi\views\DefaultView as DbapiDefaultView;
+use dbapi\views\DefaultView;
 
 class ApiSimple
 {
+    /**
+     * @var Authenticate
+     */
+    public static $auth = null;
+
+    public static $generateNewTokenOnCall = false;
+
+
     protected $availableMethods = ["_get", "_post", "_patch", "_delete"];
 
     protected $reservedQueryParams = ['id', 'page', "per_page", "count"];
@@ -21,6 +29,7 @@ class ApiSimple
     protected $requiredParams = [];
 
     protected $_hook_output = null;
+
 
 
     public static $DELETE = "_delete";
@@ -46,7 +55,7 @@ class ApiSimple
         }
 
         $this->checkRequiredParams("get", $_GET);
-        call_user_func($this->_get);
+        $this->view = call_user_func($this->_get);
     }
 
     protected function post()
@@ -58,7 +67,7 @@ class ApiSimple
 
         $params = array_merge($_POST, ApiSimple::getParamBody());
         $this->checkRequiredParams("post", $params);
-        call_user_func($this->_post, $params);
+        $this->view = call_user_func($this->_post, $params);
     }
     protected function patch()
     {
@@ -67,7 +76,7 @@ class ApiSimple
         }
         $params = ApiSimple::getParamBody();
         $this->checkRequiredParams("patch", $params);
-        call_user_func($this->_patch, $params);
+        $this->view = call_user_func($this->_patch, $params);
     }
     protected function delete()
     {
@@ -77,7 +86,7 @@ class ApiSimple
 
         $params = ApiSimple::getParamBody();
         $this->checkRequiredParams("delete", $params);
-        call_user_func($this->_delete, $params);
+        $this->view = call_user_func($this->_delete, $params);
     }
     protected function options()
     {
@@ -140,6 +149,7 @@ class ApiSimple
     public function run()
     {
         try {
+            $this->checkAuthUser();
             switch ($_SERVER['REQUEST_METHOD']) {
                 case 'GET':
                     App::$looger->debug("GET Request");
@@ -167,6 +177,14 @@ class ApiSimple
 
             if ($this->_hook_output != null) {
                 $this->view = call_user_func($this->_hook_output, $this->view, $_SERVER['REQUEST_METHOD']);
+            }
+
+            if (!is_null(self::$auth)) {
+
+                if (self::$generateNewTokenOnCall) {
+                    self::$auth->generateToken();
+                }
+                header("JWT: " . self::$auth->getToken());
             }
             $this->view->output();
         } catch (\Exception $th) {
@@ -215,6 +233,11 @@ class ApiSimple
         }
 
         return $in;
+    }
+
+    public static function setAuth(Authenticate $auth)
+    {
+        self::$auth = $auth;
     }
 
     /**
@@ -297,6 +320,17 @@ class ApiSimple
      */
     protected function getView()
     {
-        return new DbapiDefaultView;
+        return new DefaultView;
+    }
+
+
+
+    protected function checkAuthUser()
+    {
+
+        if (!is_null(self::$auth)) {
+            $d = null;
+            self::$auth->authenticate($d);
+        }
     }
 }

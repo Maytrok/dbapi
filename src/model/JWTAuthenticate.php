@@ -3,12 +3,14 @@
 namespace dbapi\model;
 
 use dbapi\controller\APISimple;
+use dbapi\exception\NotAuthorizedException;
 use dbapi\exception\NoValidSessionException;
 use dbapi\interfaces\Authenticate;
 use Firebase\JWT\JWT;
 use Exception;
 use dbapi\model\ModelBasic;
 use dbapi\interfaces\RestrictedView;
+use dbapi\tools\App;
 use dbapi\tools\HttpCode;
 
 abstract class JWTAuthenticate extends ModelBasic implements Authenticate
@@ -29,10 +31,12 @@ abstract class JWTAuthenticate extends ModelBasic implements Authenticate
         try {
             $session_error = "Keine gültige Sitzung";
             if (!key_exists("JWT", getallheaders())) {
+                App::$looger->info($session_error);
                 throw new NoValidSessionException("No JWT Header was submitted");
             };
             $jwt = getallheaders()["JWT"];
             if (strlen($jwt) == 0) {
+                App::$looger->warning($session_error);
                 throw new NoValidSessionException($session_error);
             }
 
@@ -40,12 +44,19 @@ abstract class JWTAuthenticate extends ModelBasic implements Authenticate
             $this->get($dec->userid);
             self::$id_static = $this->getId();
             if ($jwt != $this->getJwt()) {
+                App::$looger->warning($session_error);
                 throw new NoValidSessionException($session_error);
             }
 
             // If instance of Restricted View the Result will be affected
             if ($model != null && $model instanceof RestrictedView) {
                 $key = $model->restrictedKey();
+
+                if (key_exists($key, $_GET) || key_exists($key, $_POST)) {
+                    App::$looger->warning("one of the passed parameters was overwritten. check the request: " . $key);
+                    throw new NotAuthorizedException("one of the passed parameters was overwritten. check the request");
+                }
+
                 $_GET[$key] = $this->getId();
                 $_POST[$key] = $this->getId();
                 $key = "set" . ucfirst($key);
@@ -64,32 +75,30 @@ abstract class JWTAuthenticate extends ModelBasic implements Authenticate
 
     public function login($username, $password)
     {
-
         $this->where(["name" => $username]);
+        if ($password != $this->getPasswort()) {
 
-        if (!password_verify($password, $this->getPasswort())) {
             throw new Exception("Falsches Password oder Benutzername", HttpCode::FORBIDDEN);
         } else {
-            $token = array(
-                'userid' => $this->getId(),
-                "exp" => time() + $this->getExpireTime(),
-                "iat" => 1356999524,
-                "nbf" => 1357000000
-            );
-
-            $jwt = JWT::encode($token, $this->getJWTKeySecret());
-
-            $this->setJwt($jwt);
-            $this->save();
-            return ['erfolg' => true, "jwt" => $jwt];
+            return $this->generateToken();
         }
     }
 
-    public static function getModel()
+    public function generateToken()
     {
-        return self::$model;
-    }
+        $token = array(
+            'userid' => $this->getId(),
+            "exp" => time() + $this->getExpireTime(),
+            "iat" => 1356999524,
+            "nbf" => 1357000000
+        );
 
+        $jwt = JWT::encode($token, $this->getJWTKeySecret());
+
+        $this->setJwt($jwt);
+        $this->save();
+        return ['erfolg' => true, "jwt" => $jwt];
+    }
 
     public function logout()
     {
@@ -117,6 +126,11 @@ abstract class JWTAuthenticate extends ModelBasic implements Authenticate
     public function getJwt()
     {
         return $this->jwt;
+    }
+
+    public function getToken()
+    {
+        return $this->getJwt();
     }
 
     public static function getAuthUserId()

@@ -4,6 +4,7 @@ use dbapi\controller\APISimple;
 use dbapi\db\Database;
 use dbapi\tools\App;
 use dbapi\tools\EnvReader;
+use dbapi\views\DefaultView;
 use Monolog\Logger;
 
 include __DIR__ . "/../bin/basic.php";
@@ -33,7 +34,6 @@ try {
 // Alternative open with credentials
 // Database::openConnection("myUser", "5up3r53cr37");
 
-// Init
 /**
  * Supported HTTP Methods GET POST PATCH DELETE
  */
@@ -42,20 +42,26 @@ $api = new APISimple;
 // Hookup an GET Request
 $api->setGet(function () {
 
-    // Simple Get Request in which no Params needed
-    var_dump($_GET);
+    $view = new DefaultView;
+
+    $view->setMainData(["Result" => "From get Request"]);
+    return $view;
 });
 
 $api->setPOST(function ($param) {
     // Will fail if no arguments were submitted
     // Will also fail if no greetings Field in Body. This can be in url-encodet or json format
-    var_dump($param);
+    $view = new DefaultView;
+    $view->setMainData(["Result" => "From GET Request", "param" => $param]);
+    return $view;
 }, ['greetings']);
 
 $api->setPatch(function ($param) {
     // Will fail if no arguments were submitted
 
-    var_dump($param);
+    $view = new DefaultView;
+    $view->setMainData(["Update" => "Something was updated"]);
+    return $view;
 });
 
 
