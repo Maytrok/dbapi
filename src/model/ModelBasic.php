@@ -170,7 +170,7 @@ abstract class ModelBasic
     }
 
     /**
-     * @return ModelBasic
+     * @return ModelBasic|null
      */
     public static function find($id)
     {
@@ -180,7 +180,7 @@ abstract class ModelBasic
             $model->get($id);
             return $model;
         } catch (Exception $th) {
-            return [];
+            return null;
         }
     }
 
