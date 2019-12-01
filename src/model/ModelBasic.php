@@ -123,6 +123,11 @@ abstract class ModelBasic
         }
     }
 
+    public function __clone()
+    {
+        $this->id = 0;
+    }
+
     /**
      * @param array $params
      * @throws Exception
@@ -144,6 +149,51 @@ abstract class ModelBasic
 
         $this->setProperties($result[0]);
         return $this->initSuccess = true;
+    }
+
+    public static function all()
+    {
+        $t = get_called_class();
+        return Database::getAll($t::getDB(), $t::getTableName());
+    }
+
+    /**
+     * @param string $key
+     * @param string $value
+     * @param string $mod default =
+     * @return array
+     */
+    public static function findWhere($key, $value, $mod = "=")
+    {
+        $t = get_called_class();
+        return Database::where($t::getDB(), $t::getTableName(), [$key => [$value, $mod]]);
+    }
+
+    /**
+     * @return ModelBasic
+     */
+    public static function find($id)
+    {
+        $class = get_called_class();
+        $model = new $class;
+        try {
+            $model->get($id);
+            return $model;
+        } catch (Exception $th) {
+            return [];
+        }
+    }
+
+    /**
+     * @return ModelBasic
+     */
+    public static function findOrFail($id)
+    {
+        $class = get_called_class();
+        $model = new $class;
+
+        $model->get($id);
+        return $model;
     }
 
     protected function noRessourceFound()

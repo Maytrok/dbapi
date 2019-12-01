@@ -130,8 +130,15 @@ class Database extends PDO
         $qusub = "";
 
         foreach ($where as $key => $value) {
-            $qusub .= "and " . $key . "= ?";
-            $parms[] = $value;
+
+            if (is_array($value)) {
+                list($val, $mod) = $value;
+                $parms[] = $val;
+                $qusub .= "and " . $key . $mod . " ?";
+            } else {
+                $parms[] = $value;
+                $qusub .= "and " . $key . "= ?";
+            }
         }
 
         $query .= substr($qusub, 4);
