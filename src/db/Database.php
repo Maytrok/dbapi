@@ -228,9 +228,9 @@ class Database extends PDO
      * @param string $table Tablename
      * @param array $arr
      * @param int $id
-     * @return int
+     * @return bool
      */
-    public static function update($db, $table, array $arr, $id)
+    public static function update($db, $table, array $arr, $id = 0)
     {
         $query = "UPDATE " . $db . "." . $table .  " SET ";
 
@@ -252,10 +252,15 @@ class Database extends PDO
         $sth->bindValue(":id", $id, PDO::PARAM_INT);
 
         if (!$sth->execute()) {
-            return 0;
+            return false;
         } else {
-            App::$looger->info("Row update", ["query" => $query, "parms" => $arr, "id" => $id]);
-            return $sth->rowCount();
+            if ($sth->rowCount() == 1) {
+                App::$looger->info("Row update", ["query" => $query, "parms" => $arr, "id" => $id]);
+                return true;
+            } else {
+                App::$looger->notice("update failed", ["query" => $query, "parms" => $arr, "id" => $id]);
+                return false;
+            }
         }
     }
 
@@ -264,7 +269,7 @@ class Database extends PDO
      * @param string $table Tablename
      * @param int $id
      * @throws Exception
-     * @return bool|int
+     * @return bool
      */
     public static function delete($db, $table, $id)
     {

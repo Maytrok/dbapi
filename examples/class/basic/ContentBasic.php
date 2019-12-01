@@ -1,25 +1,25 @@
 <?php
-            
+
 namespace php\klassen\basic;
-      
+
 use dbapi\model\ModelBasic;
 use dbapi\interfaces\ModelProps;
 
-abstract class ContentBasic extends ModelBasic implements ModelProps 
+abstract class ContentBasic extends ModelBasic implements ModelProps
 {
-    
+
   protected $id_user;
   protected $content;
   protected $complete;
   protected $created_at;
   protected $update_at;
 
-        
-        
-        
-  public function requiredProps()
-  {return ["id_user","content"];
 
+
+
+  public function requiredProps()
+  {
+    return ["id_user", "content"];
   }
   public function getId_user()
   {
@@ -61,7 +61,7 @@ abstract class ContentBasic extends ModelBasic implements ModelProps
   {
     $this->update_at = $value;
   }
-        
+
   public static function getTableName()
   {
     return "content";
@@ -70,10 +70,10 @@ abstract class ContentBasic extends ModelBasic implements ModelProps
   {
     return "jwt";
   }
-  
-        
+
+
   public function getProperties()
   {
-    return ["id_user","content","complete","created_at","update_at"];
+    return ["id_user", "content", "complete", "created_at", "update_at"];
   }
 }

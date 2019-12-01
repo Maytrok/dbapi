@@ -8,6 +8,11 @@ use php\klassen\basic\UsersBasic;
 
 class User extends UsersBasic
 {
+
+    public static function getDB()
+    {
+        return "test_jwt";
+    }
     protected function noRessourceFound()
     {
         return "User wurde nicht gefunden";
