@@ -11,6 +11,6 @@ class BadRequestException extends Exception
     public function __construct($message)
     {
         App::$looger->warning($message);
-        parent::__construct($message, HttpCode::BAD_REQUEST);
+        parent::__construct($message, HttpCode::$BAD_REQUEST);
     }
 }

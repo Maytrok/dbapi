@@ -13,6 +13,6 @@ class NotAuthorizedException extends Exception
 
         $message = $message ? $message : "Not Authorized";
         App::$looger->notice($message);
-        parent::__construct($message, HttpCode::UNAUTHORIZED);
+        parent::__construct($message, HttpCode::$UNAUTHORIZED);
     }
 }

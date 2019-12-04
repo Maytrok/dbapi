@@ -78,7 +78,7 @@ abstract class JWTAuthenticate extends ModelBasic implements Authenticate
         $this->where(["name" => $username]);
         if ($password != $this->getPasswort()) {
 
-            throw new Exception("Falsches Password oder Benutzername", HttpCode::FORBIDDEN);
+            throw new Exception("Falsches Password oder Benutzername", HttpCode::$FORBIDDEN);
         } else {
             return $this->generateToken();
         }
@@ -104,7 +104,7 @@ abstract class JWTAuthenticate extends ModelBasic implements Authenticate
     {
 
         if (!isset(getallheaders()['JWT'])) {
-            throw new Exception("Error on Logout. Token was not submitted", HttpCode::BAD_REQUEST);
+            throw new Exception("Error on Logout. Token was not submitted", HttpCode::$BAD_REQUEST);
         }
         $jwt = getallheaders()['JWT'];
 

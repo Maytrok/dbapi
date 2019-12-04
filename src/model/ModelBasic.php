@@ -143,7 +143,7 @@ abstract class ModelBasic
 
 
         if (count($result) > 1) {
-            throw new Exception("To many Result for the where Request", HttpCode::PAYLOAD_TOO_LARGE);
+            throw new Exception("To many Result for the where Request", HttpCode::$PAYLOAD_TOO_LARGE);
         }
 
 

@@ -11,6 +11,6 @@ class NoValidSessionException extends Exception
     public function __construct($message)
     {
         App::$looger->notice($message);
-        parent::__construct($message, HttpCode::UNAUTHORIZED);
+        parent::__construct($message, HttpCode::$UNAUTHORIZED);
     }
 }

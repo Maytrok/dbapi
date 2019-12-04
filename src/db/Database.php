@@ -141,13 +141,13 @@ class Database extends PDO
 
         if (!is_array($where)) {
             App::$looger->critical("Where Param has to be an array");
-            throw new Exception("Where Param has to be an array", HttpCode::INTERNAL_SERVER_ERROR);
+            throw new Exception("Where Param has to be an array", HttpCode::$INTERNAL_SERVER_ERROR);
         }
 
+        $parms = [];
         if (count($where) > 0) {
 
             $query .= " where ";
-            $parms = [];
             $qusub = "";
 
             foreach ($where as $key => $value) {
@@ -309,18 +309,18 @@ class Database extends PDO
             $sth->bindValue(":id", $id, PDO::PARAM_INT);
             if (!$sth->execute()) {
                 App::$looger->error("Fatal Error at deleting this item", ["query" => $query, "id" => $id]);
-                throw new Exception("Fatal Error at deleting this item", HttpCode::INTERNAL_SERVER_ERROR);
+                throw new Exception("Fatal Error at deleting this item", HttpCode::$INTERNAL_SERVER_ERROR);
             }
             if ($sth->rowCount() != 1) {
                 App::$looger->error("Fatal Error at deleting. To many results", ["query" => $query, "id" => $id]);
-                throw new Exception("Fatal Error at deleting. To many results", HttpCode::INTERNAL_SERVER_ERROR);
+                throw new Exception("Fatal Error at deleting. To many results", HttpCode::$INTERNAL_SERVER_ERROR);
             }
             self::getPDO()->commit();
             return true;
         } catch (\Exception $th) {
 
             self::getPDO()->rollBack();
-            throw new Exception($th->getMessage(), HttpCode::INTERNAL_SERVER_ERROR);
+            throw new Exception($th->getMessage(), HttpCode::$INTERNAL_SERVER_ERROR);
         }
     }
 

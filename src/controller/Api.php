@@ -149,20 +149,20 @@ class Api extends ApiSimple
      * @throws Exception Exception
      * @return bool
      */
-    private function saveModel($statuscode = HttpCode::OK)
+    private function saveModel($statuscode = HttpCode::$OK)
     {
         try {
             $res = $this->model->save();
         } catch (\Exception $th) {
             App::$looger->error("An error occurred during the creation of an new DB entry");
-            throw new Exception("Database Exception", HttpCode::INTERNAL_SERVER_ERROR);
+            throw new Exception("Database Exception", HttpCode::$INTERNAL_SERVER_ERROR);
         }
 
         if (is_numeric($res)) {
 
-            if ($statuscode != HttpCode::OK) {
+            if ($statuscode != HttpCode::$OK) {
                 App::$looger->info("New Model was created");
-                http_response_code(HttpCode::CREATED);
+                http_response_code(HttpCode::$CREATED);
             } else {
                 App::$looger->info("New Model was updated");
             }
@@ -248,7 +248,7 @@ class Api extends ApiSimple
     {
         if (!in_array($method, $this->availableMethods)) {
             App::$looger->critical("Methode is not included in the Array. Please make sure you add a '_' before the Method name");
-            throw new Exception("Methode is not included in the Array. Please make sure you add a '_' before the Method name", HttpCode::INTERNAL_SERVER_ERROR);
+            throw new Exception("Methode is not included in the Array. Please make sure you add a '_' before the Method name", HttpCode::$INTERNAL_SERVER_ERROR);
         }
         array_splice($this->availableMethods, array_search($method, $this->availableMethods), 1);
     }
@@ -310,7 +310,7 @@ class Api extends ApiSimple
 
         if (!is_callable($fnc)) {
             App::$looger->critical("Parameter has to be an Funktion");
-            throw new Exception("Parameter has to be an Funktion", HttpCode::INTERNAL_SERVER_ERROR);
+            throw new Exception("Parameter has to be an Funktion", HttpCode::$INTERNAL_SERVER_ERROR);
         }
         $this->_hook_checkAuth = $fnc;
     }
@@ -339,7 +339,7 @@ class Api extends ApiSimple
     {
         if (!is_callable($fnc)) {
             App::$looger->critical("Parameter has to be an Funktion");
-            throw new Exception("Parameter has to be an Funktion", HttpCode::INTERNAL_SERVER_ERROR);
+            throw new Exception("Parameter has to be an Funktion", HttpCode::$INTERNAL_SERVER_ERROR);
         }
         $this->_hook_special_get = $fnc;
     }
@@ -356,7 +356,7 @@ class Api extends ApiSimple
     {
         if (!in_array("_" . strtolower($method), $this->availableMethods)) {
             App::$looger->warning($method . " Method was request but not allowed");
-            throw new Exception("Request Method not Allowed", HttpCode::METHOD_NOT_ALLOWED);
+            throw new Exception("Request Method not Allowed", HttpCode::$METHOD_NOT_ALLOWED);
         }
     }
 

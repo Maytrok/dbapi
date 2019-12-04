@@ -2,7 +2,7 @@
   "name": "maytrok/dbapi",
   "description": "A Simple Database model with Rest Api",
   "homepage": "https://github.com/maytrok/dbapi",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "type": "library",
   "keywords": [
     "database",
@@ -32,7 +32,7 @@
     }
   },
   "require": {
-    "php": ">=5.3.0",
+    "php": ">=5.4.0",
     "monolog/monolog": "1.*"
   },
   "require-dev": {
