@@ -7,7 +7,6 @@ use dbapi\tools\App;
 use PDO;
 use Exception;
 use dbapi\tools\EnvReader;
-use dbapi\tools\HttpCode;
 use dbapi\tools\Utils;
 use PDOException;
 
@@ -141,7 +140,7 @@ class Database extends PDO
 
         if (!is_array($where)) {
             App::$looger->critical("Where Param has to be an array");
-            throw new Exception("Where Param has to be an array", HttpCode::$INTERNAL_SERVER_ERROR);
+            throw new Exception("Where Param has to be an array", 500);
         }
 
         $parms = [];
@@ -309,18 +308,18 @@ class Database extends PDO
             $sth->bindValue(":id", $id, PDO::PARAM_INT);
             if (!$sth->execute()) {
                 App::$looger->error("Fatal Error at deleting this item", ["query" => $query, "id" => $id]);
-                throw new Exception("Fatal Error at deleting this item", HttpCode::$INTERNAL_SERVER_ERROR);
+                throw new Exception("Fatal Error at deleting this item", 500);
             }
             if ($sth->rowCount() != 1) {
                 App::$looger->error("Fatal Error at deleting. To many results", ["query" => $query, "id" => $id]);
-                throw new Exception("Fatal Error at deleting. To many results", HttpCode::$INTERNAL_SERVER_ERROR);
+                throw new Exception("Fatal Error at deleting. To many results", 500);
             }
             self::getPDO()->commit();
             return true;
         } catch (\Exception $th) {
 
             self::getPDO()->rollBack();
-            throw new Exception($th->getMessage(), HttpCode::$INTERNAL_SERVER_ERROR);
+            throw new Exception($th->getMessage(), 500);
         }
     }
 

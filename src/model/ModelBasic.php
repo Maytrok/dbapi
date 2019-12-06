@@ -8,7 +8,6 @@ use dbapi\interfaces\ModelProps;
 use dbapi\db\Database;
 use dbapi\exception\NotFoundException;
 use dbapi\tools\App;
-use dbapi\tools\HttpCode;
 
 /**
  * public static function getTableName();
@@ -143,7 +142,7 @@ abstract class ModelBasic
 
 
         if (count($result) > 1) {
-            throw new Exception("To many Result for the where Request", HttpCode::$PAYLOAD_TOO_LARGE);
+            throw new Exception("To many Result for the where Request", 413);
         }
 
 

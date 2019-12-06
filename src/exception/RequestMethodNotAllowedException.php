@@ -3,7 +3,6 @@
 namespace dbapi\exception;
 
 use dbapi\tools\App;
-use dbapi\tools\HttpCode;
 use Exception;
 
 class RequestMethodNotAllowedException extends Exception
@@ -13,6 +12,6 @@ class RequestMethodNotAllowedException extends Exception
         $message = $message ? $message : $_SERVER['REQUEST_METHOD'] . "Request Method not Allowed";
 
         App::$looger->warning($message);
-        parent::__construct($message, HttpCode::$METHOD_NOT_ALLOWED);
+        parent::__construct($message, 405);
     }
 }
