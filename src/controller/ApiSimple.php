@@ -36,6 +36,8 @@ class ApiSimple
     public static $PATCH = "_patch";
     public static $GET = "_get";
 
+    public static $SANITIZE_INPUT = true;
+
     /**
      * @var DefaultView
      */
@@ -224,7 +226,7 @@ class ApiSimple
 
         foreach ($temp as $value) {
             $item = explode("=", $value);
-            $in[$item[0]] = urldecode($item[1]);
+            $in[$item[0]] = self::sanitize(urldecode($item[1]));
         }
 
         if (!is_array($in)) {
@@ -232,6 +234,12 @@ class ApiSimple
         }
 
         return $in;
+    }
+
+    public static function sanitize($str)
+    {
+
+        return self::$SANITIZE_INPUT ? filter_var($str, FILTER_SANITIZE_SPECIAL_CHARS) : $str;
     }
 
     public static function setAuth(Authenticate $auth)

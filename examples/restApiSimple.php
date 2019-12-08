@@ -12,6 +12,11 @@ include __DIR__ . "/../bin/basic.php";
 //With Debug enabled the output will expose an Trace at each Exception
 // App::$DEBUG = true;
 
+// By Default all params for an POST or PATCH requests will be sanitizes using filter_var($X, FILTER_SANITIZE_SPECIAL_CHARS);
+// The following line disable this behavior
+
+//APISimple::$SANITIZE_INPUT = false;
+
 // Logging will enabled by default
 // To define the output directory just pase an path to the App
 // You have to add the logfile name!
