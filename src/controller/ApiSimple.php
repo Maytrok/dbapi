@@ -195,7 +195,7 @@ class ApiSimple
 
     public static function setJSONHeader()
     {
-        header('Content-Type: application/json');
+        header('Content-Type: application/json; charset=utf-8');
     }
 
     public static function getParamBody()

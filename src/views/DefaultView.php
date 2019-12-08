@@ -19,7 +19,7 @@ class DefaultView implements DbapiDefaultView
 
     public function setEncoding()
     {
-        header('Content-Type: application/json');
+        header('Content-Type: application/json; charset=utf-8');
     }
 
     public function output()

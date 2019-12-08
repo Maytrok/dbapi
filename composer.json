@@ -2,7 +2,7 @@
   "name": "maytrok/dbapi",
   "description": "A Simple Database model with Rest Api",
   "homepage": "https://github.com/maytrok/dbapi",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "type": "library",
   "keywords": [
     "database",
