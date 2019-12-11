@@ -29,17 +29,19 @@ abstract class JWTAuthenticate extends ModelBasic implements Authenticate
 
         try {
             $session_error = "Keine gültige Sitzung";
-            if (!key_exists("JWT", getallheaders())) {
+
+            $jwt = $this->getJWTFromHeader();
+            if (!$jwt) {
                 App::$looger->info($session_error);
                 throw new NoValidSessionException("No JWT Header was submitted");
             };
-            $jwt = getallheaders()["JWT"];
+
             if (strlen($jwt) == 0) {
                 App::$looger->warning($session_error);
                 throw new NoValidSessionException($session_error);
             }
 
-            $dec = JWT::decode(getallheaders()["JWT"], $this->getJWTKeySecret(), array('HS256'));
+            $dec = JWT::decode($jwt, $this->getJWTKeySecret(), array('HS256'));
             $this->get($dec->userid);
             self::$id_static = $this->getId();
             if ($jwt != $this->getJwt()) {
@@ -70,6 +72,21 @@ abstract class JWTAuthenticate extends ModelBasic implements Authenticate
             echo json_encode(['error' => $th->getMessage(), "exception" => $classname[count($classname) - 1]]);
             exit();
         }
+    }
+
+
+    private function getJWTFromHeader()
+    {
+
+        $header = getallheaders();
+
+        foreach ($header as $key => $value) {
+
+            if (strtolower($key) == "jwt") {
+                return $value;
+            }
+        }
+        return false;
     }
 
     public function login($username, $password)
