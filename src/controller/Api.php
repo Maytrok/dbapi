@@ -8,6 +8,7 @@ use dbapi\db\Database;
 use dbapi\exception\BadRequestException;
 use dbapi\exception\NotAuthorizedException;
 use dbapi\exception\NotFoundException;
+use dbapi\interfaces\Authenticate;
 use dbapi\interfaces\ModelProps;
 use dbapi\interfaces\RestrictedView;
 use dbapi\tools\App;
