@@ -4,8 +4,10 @@ namespace dbapi\controller;
 
 use Exception;
 use dbapi\exception\BadRequestException;
+use dbapi\exception\NotAuthorizedException;
 use dbapi\exception\RequestMethodNotAllowedException;
 use dbapi\interfaces\Authenticate;
+use dbapi\interfaces\AuthoricateMethod;
 use dbapi\tools\App;
 use dbapi\views\DefaultView;
 
@@ -150,7 +152,12 @@ class ApiSimple
     public function run()
     {
         try {
-            $this->checkAuthUser();
+
+
+            if (!is_null(self::$auth)) {
+                $this->checkAuthUser();
+                $this->checkAuthoricate();
+            }
             switch ($_SERVER['REQUEST_METHOD']) {
                 case 'GET':
                     App::$looger->debug("GET Request");
@@ -180,13 +187,7 @@ class ApiSimple
                 $this->view = call_user_func($this->_hook_output, $this->view, $_SERVER['REQUEST_METHOD']);
             }
 
-            if (!is_null(self::$auth)) {
 
-                if (self::$generateNewTokenOnCall) {
-                    self::$auth->generateToken();
-                }
-                header("JWT: " . self::$auth->getToken());
-            }
             $this->view->output();
         } catch (\Exception $th) {
             $this->view->error($th);
@@ -242,7 +243,7 @@ class ApiSimple
         return self::$SANITIZE_INPUT ? filter_var($str, FILTER_SANITIZE_SPECIAL_CHARS) : $str;
     }
 
-    public static function setAuth(Authenticate $auth)
+    public static function setAuth($auth)
     {
         self::$auth = $auth;
     }
@@ -334,10 +335,53 @@ class ApiSimple
 
     protected function checkAuthUser()
     {
-
-        if (!is_null(self::$auth)) {
+        if (self::$auth instanceof Authenticate) {
             $d = null;
             self::$auth->authenticate($d);
+        }
+    }
+
+    protected function generateNewJWT()
+    {
+        if (self::$auth instanceof Authenticate) {
+
+            if (self::$generateNewTokenOnCall) {
+                self::$auth->generateToken();
+                header("JWT: " . self::$auth->getToken());
+            }
+        }
+    }
+
+    protected final function checkAuthoricate()
+    {
+
+        $auth = self::$auth;
+        // Is Authocirate implemented
+        if ($auth instanceof AuthoricateMethod) {
+
+            switch ($_SERVER['REQUEST_METHOD']) {
+                case 'GET':
+
+                    if ($auth->allowGet() !== true) {
+                        throw new NotAuthorizedException();
+                    }
+                    return true;
+                case "POST":
+                    if ($auth->allowPost() !== true) {
+                        throw new NotAuthorizedException();
+                    }
+                    return true;
+                case 'PATCH':
+                    if ($auth->allowPatch() !== true) {
+                        throw new NotAuthorizedException();
+                    }
+                    return true;
+                case 'DELETE':
+                    if ($auth->allowDelete() !== true) {
+                        throw new NotAuthorizedException();
+                    }
+                    return true;
+            }
         }
     }
 }

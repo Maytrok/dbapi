@@ -317,7 +317,7 @@ class Api extends ApiSimple
 
     protected function checkAuthUser()
     {
-        if (!is_null(self::$auth)) {
+        if (self::$auth instanceof Authenticate) {
 
             if ($this->model instanceof RestrictedView) {
                 self::$auth->authenticate($this->model);
