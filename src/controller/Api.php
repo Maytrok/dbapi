@@ -18,9 +18,9 @@ class Api extends ApiSimple
     /**
      * @var ModelBasic
      */
-    private  $model;
+    protected  $model;
 
-    private $authvalue;
+    protected $authvalue;
 
     private $_hook_checkAuth;
 
@@ -28,7 +28,7 @@ class Api extends ApiSimple
 
     protected $reservedQueryParams = ['id', 'page', "per_page", "count", "special_get", "special_get_payload", "special_format"];
 
-    private $modelTable, $modelDb;
+    protected $modelTable, $modelDb;
 
     public function __construct(ModelBasic $_model)
     {
