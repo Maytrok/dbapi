@@ -6,6 +6,7 @@ use Exception;
 use dbapi\model\ModelBasic;
 use dbapi\db\Database;
 use dbapi\exception\BadRequestException;
+use dbapi\exception\LoggerExceptionCrit;
 use dbapi\exception\NotAuthorizedException;
 use dbapi\exception\NotFoundException;
 use dbapi\interfaces\Authenticate;
@@ -247,8 +248,7 @@ class Api extends ApiSimple
     private function removeMethodFromArray($method)
     {
         if (!in_array($method, $this->availableMethods)) {
-            App::$looger->critical("Methode is not included in the Array. Please make sure you add a '_' before the Method name");
-            throw new Exception("Methode is not included in the Array. Please make sure you add a '_' before the Method name", 500);
+            throw new LoggerExceptionCrit("Methode is not included in the Array. Please make sure you add a '_' before the Method name", 500);
         }
         array_splice($this->availableMethods, array_search($method, $this->availableMethods), 1);
     }
@@ -309,8 +309,7 @@ class Api extends ApiSimple
     {
 
         if (!is_callable($fnc)) {
-            App::$looger->critical("Parameter has to be an Funktion");
-            throw new Exception("Parameter has to be an Funktion", 500);
+            throw new LoggerExceptionCrit("Parameter has to be an Funktion", 500);
         }
         $this->_hook_checkAuth = $fnc;
     }
@@ -338,8 +337,7 @@ class Api extends ApiSimple
     public function hookSpecialGet($fnc)
     {
         if (!is_callable($fnc)) {
-            App::$looger->critical("Parameter has to be an Funktion");
-            throw new Exception("Parameter has to be an Funktion", 500);
+            throw new LoggerExceptionCrit("Parameter has to be an Funktion", 500);
         }
         $this->_hook_special_get = $fnc;
     }
@@ -347,7 +345,15 @@ class Api extends ApiSimple
     private final function specialGet()
     {
         if ($this->_hook_special_get != null && $this->getSpecialParam() != '') {
-            $this->view = call_user_func($this->_hook_special_get, $this->view, $this->getSpecialParam());
+            $this->view = call_user_func(
+                $this->_hook_special_get,
+                $this->view,
+                $this->getSpecialParam()
+            );
+            if (is_null($this->view)) {
+                $this->view = $this->getView();
+                throw new LoggerExceptionCrit("Server error. Special Get Method has to returned the given view", 500);
+            }
         }
     }
 
@@ -377,10 +383,12 @@ class Api extends ApiSimple
         if (isset($_GET['special_format'])) {
             $format = explode(",", $_GET['special_format']);
 
+            $valid = array_merge(["id"], $this->model->getProperties());
+
             foreach ($format as $value) {
 
                 // Valid Column 
-                if (in_array($value, $this->model->getProperties())) {
+                if (in_array($value, $valid)) {
                     $res[] = $value;
                 } else {
                     throw new BadRequestException("Wrong format request");

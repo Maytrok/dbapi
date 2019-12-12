@@ -19,7 +19,10 @@ $stream->setFormatter(new LineFormatter($format));
 App::$looger->pushHandler($stream);
 App::$looger->pushHandler(new FirePHPHandler());
 App::$looger->pushProcessor(function ($record) {
-    $record['extra']['defaults'] = ["ip" => $_SERVER['REMOTE_ADDR'], "requesturi" => $_SERVER['REQUEST_URI'], "parms" => ApiSimple::getParamBody()];
+    $remote = isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : "0.0.0.0";
+    $requesturi = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : "---";
+
+    $record['extra']['defaults'] = ["ip" => $remote, "requesturi" => $requesturi, "parms" => ApiSimple::getParamBody()];
 
     return $record;
 });

@@ -2,6 +2,7 @@
 
 use dbapi\controller\Authenticate;
 use dbapi\db\Database;
+use dbapi\tools\App;
 use dbapi\tools\EnvReader;
 use php\klassen\User;
 
@@ -17,7 +18,6 @@ try {
     App::$looger->emergency("Connection to Database failed!");
     exit();
 }
-
 include_once __DIR__ . '/../../autoload.php';
 include_once __DIR__ . '/class/basic/UsersBasic.php';
 include_once __DIR__ . '/class/User.php';

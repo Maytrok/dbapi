@@ -56,9 +56,13 @@ $api->hookAuth(function (Content $model, $REQUEST_METHOD) {
     // Does not Work for GET METHODS
 
     // denial a request method for an specific user
-    if ($REQUEST_METHOD == "POST" && Api::$auth->getName() == "someName") {
 
-        throw new NotAuthorizedException();
+    if (Api::$auth instanceof User) {
+
+        if ($REQUEST_METHOD == "POST" && Api::$auth->getName() == "someName") {
+
+            throw new NotAuthorizedException();
+        }
     }
 
     // prohibits an action based on the Model State

@@ -4,6 +4,7 @@ namespace dbapi\controller;
 
 use Exception;
 use dbapi\exception\BadRequestException;
+use dbapi\exception\LoggerExceptionCrit;
 use dbapi\exception\NotAuthorizedException;
 use dbapi\exception\RequestMethodNotAllowedException;
 use dbapi\interfaces\Authenticate;
@@ -13,9 +14,6 @@ use dbapi\views\DefaultView;
 
 class ApiSimple
 {
-    /**
-     * @var Authenticate
-     */
     public static $auth = null;
 
     public static $generateNewTokenOnCall = false;
@@ -47,6 +45,7 @@ class ApiSimple
 
     public function __construct()
     {
+
         $this->view = $this->getView();
     }
 
@@ -102,10 +101,7 @@ class ApiSimple
     public function setGet($func, $requiredParams = [])
     {
 
-        if (!is_callable($func)) {
-            App::$looger->critical("Argument must be an function");
-            throw new Exception("Argument must be an function", 500);
-        }
+        $this->validSetMethodParams($func, $requiredParams);
         if (count($requiredParams) != 0) {
             $this->requiredParams["get"] = $requiredParams;
         }
@@ -114,10 +110,7 @@ class ApiSimple
     public function setPost($func, $requiredParams = [])
     {
 
-        if (!is_callable($func)) {
-            App::$looger->critical("Argument must be an function");
-            throw new Exception("Argument must be an function", 500);
-        }
+        $this->validSetMethodParams($func, $requiredParams);
         if (count($requiredParams) != 0) {
             $this->requiredParams["post"] = $requiredParams;
         }
@@ -126,10 +119,7 @@ class ApiSimple
     public function setPatch($func, $requiredParams = [])
     {
 
-        if (!is_callable($func)) {
-            App::$looger->critical("Argument must be an function");
-            throw new Exception("Argument must be an function", 500);
-        }
+        $this->validSetMethodParams($func, $requiredParams);
 
         if (count($requiredParams) != 0) {
             $this->requiredParams["patch"] = $requiredParams;
@@ -139,14 +129,26 @@ class ApiSimple
     public function setDelete($func, $requiredParams = [])
     {
 
-        if (!is_callable($func)) {
-            App::$looger->critical("Argument must be an function");
-            throw new Exception("Argument must be an function", 500);
-        }
+        $this->validSetMethodParams($func, $requiredParams);
         if (count($requiredParams) != 0) {
             $this->requiredParams["delete"] = $requiredParams;
         }
         $this->_delete = $func;
+    }
+
+    private final function validSetMethodParams($func, $param)
+    {
+
+        try {
+            if (!is_callable($func)) {
+                throw new LoggerExceptionCrit("Argument must be an function", 500);
+            }
+            if (!is_array($param)) {
+                throw new LoggerExceptionCrit("requiredParams must be an array", 500);
+            }
+        } catch (Exception $th) {
+            $this->handleError($th);
+        }
     }
 
     public function run()
@@ -183,6 +185,11 @@ class ApiSimple
                     throw new RequestMethodNotAllowedException();
             }
 
+            if (is_null($this->view)) {
+
+                throw new LoggerExceptionCrit("Hooks has to return an View", 500);
+            }
+
             if ($this->_hook_output != null) {
                 $this->view = call_user_func($this->_hook_output, $this->view, $_SERVER['REQUEST_METHOD']);
             }
@@ -190,8 +197,14 @@ class ApiSimple
 
             $this->view->output();
         } catch (\Exception $th) {
-            $this->view->error($th);
+            $this->handleError($th);
         }
+    }
+
+    protected final function handleError(Exception $e)
+    {
+        $this->view = $this->getView();
+        $this->view->error($e);
     }
 
     public static function setJSONHeader()
@@ -317,8 +330,7 @@ class ApiSimple
     public function hookOutput($fnc)
     {
         if (!is_callable($fnc)) {
-            App::$looger->critical("Parameter has to be an Funktion");
-            throw new Exception("Parameter has to be an Funktion", 500);
+            throw new LoggerExceptionCrit("Parameter has to be an Funktion", 500);
         }
         $this->_hook_output = $fnc;
     }
