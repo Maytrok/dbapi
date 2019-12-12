@@ -3,6 +3,7 @@
 namespace Helper;
 
 use dbapi\db\Database;
+use dbapi\tools\App;
 
 // here you can define custom actions
 // all public methods declared in helper class will be available in $I
@@ -10,27 +11,29 @@ use dbapi\db\Database;
 class Unit extends \Codeception\Module
 {
 
-    public function _initialize()
-    {
+  public function _initialize()
+  {
+    App::$looger->pushHandler(new \Monolog\Handler\NullHandler());
+    App::$looger->popProcessor();
 
-        Database::openConnection("root", "");
-        $pdo = Database::getPDO();
-        $pdo->exec("DROP DATABASE if exists test_jwt");
+    Database::openConnection("root", "");
+    $pdo = Database::getPDO();
+    $pdo->exec("DROP DATABASE if exists test_jwt");
 
-        $pdo->exec("CREATE Database test_jwt");
-        $pdo->exec("use test_jwt");
+    $pdo->exec("CREATE Database test_jwt");
+    $pdo->exec("use test_jwt");
 
-        $query = "CREATE TABLE `content` (
+    $query = "CREATE TABLE `content` (
             `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
             `content` text NOT NULL,
             `user` int NOT NULL,
             PRIMARY KEY (`id`)
           )";
-        Database::getPDO()->exec($query);
+    Database::getPDO()->exec($query);
 
 
-        $pdo = Database::getPDO();
-        $query = "CREATE TABLE IF NOT EXISTS `users` (
+    $pdo = Database::getPDO();
+    $query = "CREATE TABLE IF NOT EXISTS `users` (
             `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
             `name` varchar(100) NOT NULL,
             `passwort` varchar(100) NOT NULL,
@@ -38,9 +41,9 @@ class Unit extends \Codeception\Module
             `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
             PRIMARY KEY (`id`)
           )";
-        $pdo->exec($query);
+    $pdo->exec($query);
 
-        include_once __DIR__ . "\\..\\..\\..\\examples\\class\\basic\\UsersBasic.php";
-        include_once __DIR__ . "\\..\\..\\..\\examples\\class\\User.php";
-    }
+    include_once __DIR__ . "\\..\\..\\..\\examples\\class\\basic\\UsersBasic.php";
+    include_once __DIR__ . "\\..\\..\\..\\examples\\class\\User.php";
+  }
 }
