@@ -38,6 +38,8 @@ class ApiSimple
     public static $PATCH = "_patch";
     public static $GET = "_get";
 
+    protected static $bodyparam = "";
+
     public static $SANITIZE_INPUT = true;
 
     /**
@@ -201,7 +203,11 @@ class ApiSimple
 
     public static function getParamBody()
     {
-        return self::parse(file_get_contents("php://input"));
+        if(self::$bodyparam == ""){
+
+            self::$bodyparam = self::parse(file_get_contents("php://input"));
+        }
+        return self::$bodyparam
     }
 
 
