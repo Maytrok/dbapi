@@ -216,11 +216,11 @@ class ApiSimple
 
     public static function getParamBody()
     {
-        if(self::$bodyparam == ""){
+        if (self::$bodyparam == "") {
 
             self::$bodyparam = self::parse(file_get_contents("php://input"));
         }
-        return self::$bodyparam
+        return self::$bodyparam;
     }
 
 
