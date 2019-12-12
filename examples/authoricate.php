@@ -59,7 +59,7 @@ class CustomCheck implements AuthoricateMethod
 
     private function validIp()
     {
-        return $_SERVER['REMOTE_ADDR'] != "192.168.13.37";
+        return $_SERVER['REMOTE_ADDR'] == "192.168.13.37";
     }
 
     public function allowGet()

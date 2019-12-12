@@ -3,6 +3,7 @@
 use dbapi\controller\Api;
 use dbapi\db\Database;
 use dbapi\interfaces\DefaultView;
+use dbapi\tools\App;
 use php\klassen\Content;
 use dbapi\tools\EnvReader;
 
@@ -18,7 +19,6 @@ try {
     App::$looger->emergency("Connection to Database failed!");
     exit();
 }
-
 // Alternative open with credentials
 // Database::openConnection("myUser", "5up3r53cr37");
 
@@ -41,6 +41,9 @@ $content = new Content();
  * additional parameters can be passed to limit the result =>               https://example.com/?complete=1
  * 
  * For an DELETE OR Patch request, an ID is required =>                     https://example.com/?id=69
+ * 
+ * The reserved Param special_format make the response only
+ * shown the given fields. Dont work with an id                             https://example.com/?special_format=id,content
  */
 $api = new Api($content);
 

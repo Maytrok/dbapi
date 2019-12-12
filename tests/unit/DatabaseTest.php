@@ -1,43 +1,18 @@
 <?php
 
+use Codeception\Test\Unit;
 use dbapi\db\Database;
-use dbapi\exception\NotFoundException;
-use PHPUnit\Framework\TestCase;
 
-class DatabaseTest extends TestCase
+class DatabaseTest extends Unit
 {
 
-
-    public static function setUpBeforeClass()
-    {
-        $pdo = Database::getPDO();
-        $query = "CREATE Database test_jwt";
-        $pdo->exec($query);
-
-        $pdo->exec("use test_jwt");
-        $query = "CREATE TABLE IF NOT EXISTS `content` (
-            `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-            `content` text NOT NULL,
-            `user` int NOT NULL,
-            PRIMARY KEY (`id`)
-          )";
-        $pdo->exec($query);
-    }
-
-
-    public function tearDown()
+    protected function _after()
     {
         Database::getPDO()->exec("truncate content");
     }
 
-    public static function tearDownAfterClass()
-    {
-        Database::getPDO()->exec("drop database test_jwt");
-    }
-
     public function testDBConnected()
     {
-
         $sth = Database::getPDO()->prepare("select * from content");
         $this->assertTrue($sth->execute());
     }

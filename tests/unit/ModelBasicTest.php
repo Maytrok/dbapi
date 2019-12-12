@@ -1,46 +1,17 @@
 <?php
 
+use Codeception\Test\Unit;
 use dbapi\db\Database;
 use dbapi\exception\NotFoundException;
-use dbapi\tools\App;
 use php\klassen\User;
-use PHPUnit\Framework\TestCase;
 
-class ModelBasicTest extends TestCase
+class ModelBasicTest extends Unit
 {
-    public static function setUpBeforeClass()
-    {
-        $pdo = Database::getPDO();
-        $query = "CREATE Database test_jwt";
-        $pdo->exec($query);
 
-        $pdo->exec("use test_jwt");
-        $query = "CREATE TABLE IF NOT EXISTS `users` (
-            `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-            `name` varchar(100) NOT NULL,
-            `passwort` varchar(100) NOT NULL,
-            `jwt` varchar(100) DEFAULT NULL,
-            `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-            PRIMARY KEY (`id`)
-          )";
-        $pdo->exec($query);
-
-
-        include_once __DIR__ . "\\..\\..\\examples\\class\\basic\\UsersBasic.php";
-        include_once __DIR__ . "\\..\\..\\examples\\class\\User.php";
-    }
-
-    public function tearDown()
+    protected function _after()
     {
         Database::getPDO()->exec("truncate users");
     }
-
-
-    public static function tearDownAfterClass()
-    {
-        $pdo = Database::getPDO()->exec("drop database test_jwt");
-    }
-
 
     public function testCreateUserFailure()
     {
@@ -222,7 +193,6 @@ class ModelBasicTest extends TestCase
 
             if ($i % 3 == 0) {
                 $user->setJwt("mod");
-                fwrite(STDOUT, $user->getJwt());
             } else {
                 $user->setJwt("test");
             }

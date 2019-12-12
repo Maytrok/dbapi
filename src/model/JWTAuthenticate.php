@@ -119,11 +119,11 @@ abstract class JWTAuthenticate extends ModelBasic implements Authenticate
     public function logout()
     {
 
-        if (!isset(getallheaders()['JWT'])) {
+
+        $jwt = $this->getJWTFromHeader();
+        if ($jwt === false) {
             throw new Exception("Error on Logout. Token was not submitted", 400);
         }
-        $jwt = getallheaders()['JWT'];
-
         $this->where(["jwt" => $jwt]);
 
         $this->setJwt(null);
