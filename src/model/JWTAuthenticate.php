@@ -3,7 +3,7 @@
 namespace dbapi\model;
 
 use dbapi\controller\APISimple;
-use dbapi\exception\NotAuthorizedException;
+use dbapi\exception\BadRequestException;
 use dbapi\exception\NoValidSessionException;
 use dbapi\interfaces\Authenticate;
 use Firebase\JWT\JWT;
@@ -55,7 +55,7 @@ abstract class JWTAuthenticate extends ModelBasic implements Authenticate
 
                 if (key_exists($key, $_GET) || key_exists($key, $_POST)) {
                     App::$looger->warning("one of the passed parameters was overwritten. check the request: " . $key);
-                    throw new NotAuthorizedException("one of the passed parameters was overwritten. check the request");
+                    throw new BadRequestException("one of the passed parameters was overwritten. check the request");
                 }
 
                 $_GET[$key] = $this->getId();
