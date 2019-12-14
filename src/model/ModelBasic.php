@@ -14,9 +14,8 @@ use dbapi\tools\App;
  * public static function getDB();
  * /**
  * @ return array
- * array_keys(get_class_vars(self::class))
- * Es werden alle Properties fuer die Klasse definiert 
- * protected function getProperties();
+ * All Properties, aside from id has to be in this array
+ * abstract public function getProperties();
  */
 abstract class ModelBasic
 {
@@ -29,7 +28,7 @@ abstract class ModelBasic
     /**
      * @return array
      * array_keys(get_class_vars(self::class))
-     * Es werden alle Properties fuer die Klasse definiert
+     * All Properties, aside from id has to be in this array
      */
     abstract public function getProperties();
 
@@ -39,7 +38,7 @@ abstract class ModelBasic
     }
 
     /**
-     * Wurde das Objekt erfolgreich instanziiert
+     * Init successful?
      */
     public function isInitSuccess()
     {
@@ -64,6 +63,11 @@ abstract class ModelBasic
         return $this->initSuccess = true;
     }
 
+    /**
+     * @param array $arr
+     * Updates several properties
+     * Arraykey = Propertie Name
+     */
     public function setProperties(array $arr)
     {
 
@@ -91,10 +95,18 @@ abstract class ModelBasic
         }
     }
 
+    /**
+     * deletes the current model
+     * @throws Exception
+     */
     public function delete()
     {
+        if ($this->initSuccess) {
 
-        return Database::delete($this::getDB(), $this::getTableName(), $this->id);
+            return Database::delete($this::getDB(), $this::getTableName(), $this->id);
+        } else {
+            throw new Exception("Model wasn't fully initiated", 500);
+        }
     }
 
 
@@ -116,8 +128,8 @@ abstract class ModelBasic
 
         foreach ($required as $value) {
             if ($this->$value == null || $this->$value == "") {
-                App::$looger->info("Nicht alle Props gesetzt", $this->getPropsArray());
-                throw new Exception("Es wurden nicht alle Props fuer die die Instanz gesetzt. Speichern nocht moeglich " . $value, 500);
+                App::$looger->warning("missing property", $this->getPropsArray());
+                throw new Exception("Not all properties were set for the instance. Saving not possible: " . $value, 500);
             }
         }
     }
@@ -150,6 +162,10 @@ abstract class ModelBasic
         return $this->initSuccess = true;
     }
 
+    /**
+     * Get all DB entries
+     * @throws NotFoundException
+     */
     public static function all()
     {
         $t = get_called_class();
@@ -184,6 +200,7 @@ abstract class ModelBasic
     }
 
     /**
+     * @throws NotFoundException
      * @return ModelBasic
      */
     public static function findOrFail($id)
