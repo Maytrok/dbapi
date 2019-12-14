@@ -2,7 +2,7 @@
 
 use dbapi\controller\Api;
 use dbapi\db\Database;
-use dbapi\interfaces\DefaultView;
+use dbapi\interfaces\View;
 use dbapi\tools\App;
 use php\klassen\Content;
 use dbapi\tools\EnvReader;
@@ -54,7 +54,7 @@ $api->disallowMethod(Api::$DELETE);
 
 // The output hook is called at each output
 // To modify the output just return the edited output
-$api->hookOutput(function (DefaultView $view, $REQUEST_METHOD) {
+$api->hookOutput(function (View $view, $REQUEST_METHOD) {
 
     // Adding greeting to each GET Request
     if ($REQUEST_METHOD == "GET") {
@@ -65,7 +65,7 @@ $api->hookOutput(function (DefaultView $view, $REQUEST_METHOD) {
 });
 
 // The hook will be called instead of the normal Get procedure
-$api->hookSpecialGet(function (DefaultView $view, $request) {
+$api->hookSpecialGet(function (View $view, $request) {
 
     if ($request == "latest") {
         $sth = Database::getPDO()->prepare("select * from jwt.content where id > 20");

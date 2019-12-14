@@ -3,11 +3,11 @@
 namespace dbapi\views;
 
 use dbapi\db\Database;
-use dbapi\interfaces\DefaultView as DbapiDefaultView;
+use dbapi\interfaces\View;
 use dbapi\tools\App;
 use Exception;
 
-class DefaultView implements DbapiDefaultView
+class JsonView implements View
 {
 
     private $data = [];

@@ -4,7 +4,7 @@ use dbapi\controller\APISimple;
 use dbapi\db\Database;
 use dbapi\tools\App;
 use dbapi\tools\EnvReader;
-use dbapi\views\DefaultView;
+use dbapi\views\JsonView;
 use Monolog\Logger;
 
 include __DIR__ . "/../bin/basic.php";
@@ -47,7 +47,7 @@ $api = new APISimple;
 // Hookup an GET Request
 $api->setGet(function () {
 
-    $view = new DefaultView;
+    $view = new JsonView;
 
     $view->setMainData(["Result" => "From get Request"]);
     return $view;
@@ -56,7 +56,7 @@ $api->setGet(function () {
 $api->setPOST(function ($param) {
     // Will fail if no arguments were submitted
     // Will also fail if no greetings Field in Body. This can be in url-encodet or json format
-    $view = new DefaultView;
+    $view = new JsonView;
     $view->setMainData(["Result" => "From GET Request", "param" => $param]);
     return $view;
 }, ['greetings']);
@@ -64,7 +64,7 @@ $api->setPOST(function ($param) {
 $api->setPatch(function ($param) {
     // Will fail if no arguments were submitted
 
-    $view = new DefaultView;
+    $view = new JsonView;
     $view->setMainData(["Update" => "Something was updated"]);
     return $view;
 });

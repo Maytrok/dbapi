@@ -4,7 +4,7 @@ namespace dbapi\interfaces;
 
 use Exception;
 
-interface DefaultView
+interface View
 {
 
     /**

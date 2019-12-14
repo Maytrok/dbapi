@@ -9,8 +9,9 @@ use dbapi\exception\NotAuthorizedException;
 use dbapi\exception\RequestMethodNotAllowedException;
 use dbapi\interfaces\Authenticate;
 use dbapi\interfaces\AuthoricateMethod;
+use dbapi\interfaces\View;
 use dbapi\tools\App;
-use dbapi\views\DefaultView;
+use dbapi\views\JsonView;
 
 class ApiSimple
 {
@@ -41,7 +42,7 @@ class ApiSimple
     public static $SANITIZE_INPUT = true;
 
     /**
-     * @var DefaultView
+     * @var View
      */
     public $view = null;
 
@@ -347,11 +348,11 @@ class ApiSimple
     }
 
     /**
-     * @return DefaultView
+     * @return View
      */
     protected function getView()
     {
-        return new DefaultView;
+        return new JsonView;
     }
 
 

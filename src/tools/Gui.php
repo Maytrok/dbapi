@@ -6,7 +6,7 @@ use dbapi\controller\ApiSimple;
 use dbapi\db\Database;
 use dbapi\exception\BadRequestException;
 use dbapi\exception\NotAuthorizedException;
-use dbapi\views\DefaultView;
+use dbapi\views\JsonView;
 use Exception;
 use PDO;
 
@@ -26,11 +26,11 @@ class Gui
 
         $api->setPost(function ($bodyparams) {
 
-            $view = new DefaultView;
+            $view = new JsonView;
 
 
 
-            $view = new DefaultView;
+            $view = new JsonView;
             switch ($bodyparams['actions']) {
 
                 case "dbs":
@@ -82,7 +82,7 @@ class Gui
 
                     return $view;
                 case "create":
-                    $view = new DefaultView;
+                    $view = new JsonView;
                     try {
                         Database::openConnection($bodyparams['user'], $bodyparams['password']);
                     } catch (Exception $th) {
@@ -93,7 +93,7 @@ class Gui
                         throw new BadRequestException("Param db or table missing");
                     }
 
-                    new ClassGenerator($bodyparams['table'], $bodyparams['db']);
+                    $temp = new ClassGenerator($bodyparams['table'], $bodyparams['db']);
 
                     return $view;
 

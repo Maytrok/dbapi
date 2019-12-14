@@ -330,7 +330,7 @@ class Api extends ApiSimple
 
     /**
      * The Lamba function has to return the View given in the 1.param
-     * 1 Param DefaultView
+     * 1 Param View
      * 2 Param the special request param
      * @param callable $fnc
      */
