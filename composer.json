@@ -39,7 +39,8 @@
     "phan/phan": "^2.4",
     "firebase/php-jwt": "^5.0",
     "codeception/codeception": "^3.1",
-    "flow/jsonpath": "^0.4.0"
+    "flow/jsonpath": "^0.4.0",
+    "fzaninotto/faker": "^1.9"
   },
   "suggest": {
     "firebase/php-jwt": "JWT Auth: Required if using JWTAuththenticate Model"
