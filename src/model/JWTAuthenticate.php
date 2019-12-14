@@ -2,7 +2,6 @@
 
 namespace dbapi\model;
 
-use dbapi\controller\APISimple;
 use dbapi\exception\BadRequestException;
 use dbapi\exception\NoValidSessionException;
 use dbapi\interfaces\Authenticate;
@@ -26,51 +25,41 @@ abstract class JWTAuthenticate extends ModelBasic implements Authenticate
 
     public function authenticate(&$model = null)
     {
+        $session_error = "Keine gültige Sitzung";
 
-        try {
-            $session_error = "Keine gültige Sitzung";
+        $jwt = $this->getJWTFromHeader();
+        if (!$jwt) {
+            App::$looger->info($session_error);
+            throw new NoValidSessionException("No JWT Header was submitted");
+        };
 
-            $jwt = $this->getJWTFromHeader();
-            if (!$jwt) {
-                App::$looger->info($session_error);
-                throw new NoValidSessionException("No JWT Header was submitted");
-            };
+        if (strlen($jwt) == 0) {
+            App::$looger->warning($session_error);
+            throw new NoValidSessionException($session_error);
+        }
 
-            if (strlen($jwt) == 0) {
-                App::$looger->warning($session_error);
-                throw new NoValidSessionException($session_error);
+        $dec = JWT::decode($jwt, $this->getJWTKeySecret(), array('HS256'));
+        $this->get($dec->userid);
+        self::$id_static = $this->getId();
+        if ($jwt != $this->getJwt()) {
+            App::$looger->warning($session_error);
+            throw new NoValidSessionException($session_error);
+        }
+
+        // If instance of Restricted View the Result will be affected
+        if ($model != null && $model instanceof RestrictedView) {
+            $key = $model->restrictedKey();
+
+            if (key_exists($key, $_GET) || key_exists($key, $_POST)) {
+                App::$looger->warning("one of the passed parameters was overwritten. check the request: " . $key);
+                throw new BadRequestException("one of the passed parameters was overwritten. check the request");
             }
 
-            $dec = JWT::decode($jwt, $this->getJWTKeySecret(), array('HS256'));
-            $this->get($dec->userid);
-            self::$id_static = $this->getId();
-            if ($jwt != $this->getJwt()) {
-                App::$looger->warning($session_error);
-                throw new NoValidSessionException($session_error);
-            }
-
-            // If instance of Restricted View the Result will be affected
-            if ($model != null && $model instanceof RestrictedView) {
-                $key = $model->restrictedKey();
-
-                if (key_exists($key, $_GET) || key_exists($key, $_POST)) {
-                    App::$looger->warning("one of the passed parameters was overwritten. check the request: " . $key);
-                    throw new BadRequestException("one of the passed parameters was overwritten. check the request");
-                }
-
-                $_GET[$key] = $this->getId();
-                $_POST[$key] = $this->getId();
-                $key = "set" . ucfirst($key);
-                $model->$key = $this->getId();
-                self::$model = $this;
-            }
-        } catch (Exception $th) {
-
-            http_response_code($th->getCode());
-            APISimple::setJSONHeader();
-            $classname = explode("\\", get_class($th));
-            echo json_encode(['error' => $th->getMessage(), "exception" => $classname[count($classname) - 1]]);
-            exit();
+            $_GET[$key] = $this->getId();
+            $_POST[$key] = $this->getId();
+            $key = "set" . ucfirst($key);
+            $model->$key = $this->getId();
+            self::$model = $this;
         }
     }
 

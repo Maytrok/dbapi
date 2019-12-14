@@ -17,7 +17,7 @@ class JsonView implements View
     public $mainDataOnRootElement = false;
 
 
-    public function setEncoding()
+    public static function setEncoding()
     {
         header('Content-Type: application/json; charset=utf-8');
     }
@@ -25,7 +25,7 @@ class JsonView implements View
     public function output()
     {
 
-        $this->setEncoding();
+        self::setEncoding();
 
         if (!key_exists("error", $this->data)) {
             $this->data['status'] = "Ok";

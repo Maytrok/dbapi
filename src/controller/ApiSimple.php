@@ -215,11 +215,6 @@ class ApiSimple
         $this->view->error($e);
     }
 
-    public static function setJSONHeader()
-    {
-        header('Content-Type: application/json; charset=utf-8');
-    }
-
     public static function getParamBody()
     {
         if (self::$bodyparam == "") {

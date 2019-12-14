@@ -24,5 +24,5 @@ interface View
      * @param array $array
      */
     public function setData($array);
-    public function setEncoding();
+    public static function setEncoding();
 }
