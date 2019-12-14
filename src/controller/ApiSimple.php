@@ -95,7 +95,7 @@ class ApiSimple
     protected function options()
     {
         header("access-control-allow-methods: " . implode(",", $this->getAllowedMethods()));
-        header("access-control-allow-origin: " . getallheaders()['Host']);
+        header("access-control-allow-origin: *");
         header("access-control-allow-credentials: true");
         header("access-control-allow-headers: content-type");
     }
@@ -109,6 +109,11 @@ class ApiSimple
         }
         $this->_get = $func;
     }
+    /**
+     * @param callable $func
+     * @param array $requiredParams
+     * Function($bodyParams)
+     */
     public function setPost($func, $requiredParams = [])
     {
 
