@@ -17,6 +17,8 @@ class Database extends PDO
 
     public static $throwExceptionOnNotFound = false;
 
+    private static $pdoOpt = [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC, PDO::MYSQL_ATTR_FOUND_ROWS => true];
+
 
     /**
      * @param string $user
@@ -26,8 +28,8 @@ class Database extends PDO
      */
     public static function openConnection($user, $password, $server = "localhost")
     {
-        $opt = [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC];
-        self::$connection = new PDO("mysql:host=" . $server . ";charset=utf8", $user,  $password, $opt);
+
+        self::$connection = new PDO("mysql:host=" . $server . ";charset=utf8", $user,  $password, self::$pdoOpt);
     }
 
     /**
@@ -40,8 +42,8 @@ class Database extends PDO
         $user = $env->env['USER'];
         $password = $env->env['PASSWORD'];
         $server = $env->env['SERVER'];
-        $opt = [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC];
-        self::$connection = new PDO("mysql:host=" . $server . ";charset=utf8", $user,  $password, $opt);
+
+        self::$connection = new PDO("mysql:host=" . $server . ";charset=utf8", $user,  $password, self::$pdoOpt);
     }
 
     /**

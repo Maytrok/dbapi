@@ -4,4 +4,3 @@ modules:
     - REST:
         url: http://localhost/auth/
         depends: PhpBrowser
-        part: Json

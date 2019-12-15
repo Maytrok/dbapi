@@ -159,7 +159,7 @@ class Api extends ApiSimple
             throw new Exception("Database Exception", 500);
         }
 
-        if (is_numeric($res)) {
+        if (is_numeric($res) || $res === true) {
 
             if ($statuscode != 200) {
                 App::$looger->info("New Model was created");

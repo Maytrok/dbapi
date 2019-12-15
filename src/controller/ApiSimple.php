@@ -12,6 +12,7 @@ use dbapi\interfaces\AuthoricateMethod;
 use dbapi\interfaces\View;
 use dbapi\tools\App;
 use dbapi\views\JsonView;
+use dbapi\views\XmlView;
 
 class ApiSimple
 {
@@ -44,13 +45,13 @@ class ApiSimple
     /**
      * @var View
      */
-    public $view = null;
+    protected $view = null;
+
+
+    private $privView = null;
 
     public function __construct()
-    {
-
-        $this->view = $this->getView();
-    }
+    { }
 
     protected function get()
     {
@@ -163,6 +164,7 @@ class ApiSimple
     {
         try {
 
+            $this->view = $this->getView();
 
             if (!is_null(self::$auth)) {
                 $this->checkAuthUser();
@@ -211,6 +213,8 @@ class ApiSimple
 
     protected final function handleError(Exception $e)
     {
+
+        if (!$this->view instanceof View) { }
         $this->view = $this->getView();
         $this->view->error($e);
     }
@@ -347,7 +351,12 @@ class ApiSimple
      */
     protected function getView()
     {
-        return new JsonView;
+        return $this->privView == null ? new JsonView : $this->privView;
+    }
+
+    public function setView(View $view)
+    {
+        $this->privView = $view;
     }
 
 

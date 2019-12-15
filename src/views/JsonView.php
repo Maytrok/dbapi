@@ -10,9 +10,9 @@ use Exception;
 class JsonView implements View
 {
 
-    private $data = [];
+    protected $data = [];
 
-    private $dataKey = "data";
+    protected $dataKey = "data";
 
     public $mainDataOnRootElement = false;
 
@@ -24,7 +24,6 @@ class JsonView implements View
 
     public function output()
     {
-
         self::setEncoding();
 
         if (!key_exists("error", $this->data)) {
