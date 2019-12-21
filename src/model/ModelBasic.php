@@ -110,7 +110,7 @@ abstract class ModelBasic
     }
 
 
-    private function getPropsArray()
+    protected function getPropsArray()
     {
         $arr = [];
         foreach ($this->getProperties() as $value) {

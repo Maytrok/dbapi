@@ -64,7 +64,7 @@ abstract class JWTAuthenticate extends ModelBasic implements Authenticate
     }
 
 
-    private function getJWTFromHeader()
+    protected function getJWTFromHeader()
     {
 
         $header = getallheaders();
