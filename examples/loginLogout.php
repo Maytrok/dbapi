@@ -15,7 +15,6 @@ try {
     error_reporting(E_ERROR);
 } catch (\Exception $th) {
     // Fatal Error with the Database Connection
-    App::$looger->emergency("Connection to Database failed!");
     exit();
 }
 include_once __DIR__ . '/../../autoload.php';

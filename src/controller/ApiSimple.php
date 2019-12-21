@@ -12,7 +12,6 @@ use dbapi\interfaces\AuthoricateMethod;
 use dbapi\interfaces\View;
 use dbapi\tools\App;
 use dbapi\views\JsonView;
-use dbapi\views\XmlView;
 
 class ApiSimple
 {

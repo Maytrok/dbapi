@@ -2,9 +2,6 @@
 
 namespace dbapi\views;
 
-use dbapi\db\Database;
-use dbapi\tools\App;
-use Exception;
 use SimpleXMLElement;
 
 class XmlView extends JsonView
@@ -29,7 +26,7 @@ class XmlView extends JsonView
 
                 if (count($this->data[$this->dataKey]) > 1) {
 
-                    $xml->addChild('count', count($this->data[$this->dataKey]));
+                    $xml->addChild('count', strval(count($this->data[$this->dataKey])));
                 }
             }
         }

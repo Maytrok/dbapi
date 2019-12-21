@@ -17,10 +17,10 @@ include __DIR__ . "/../bin/basic.php";
 
 //APISimple::$SANITIZE_INPUT = false;
 
-// Logging will enabled by default
+// Logging will disabled by default
 // To define the output directory just pase an path to the App
 // You have to add the logfile name!
-App::setLogPath(__DIR__ . "\\logs\\dbapi.log");
+App::initLogger(__DIR__ . "\\dbapi_default_logger");
 
 // You can manipulate the Log level
 App::setLogLevel(Logger::NOTICE);

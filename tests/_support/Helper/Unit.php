@@ -13,8 +13,6 @@ class Unit extends \Codeception\Module
 
   public function _initialize()
   {
-    App::$looger->pushHandler(new \Monolog\Handler\NullHandler());
-    App::$looger->popProcessor();
 
     Database::openConnection("root", "");
     $pdo = Database::getPDO();
