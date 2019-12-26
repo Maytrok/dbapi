@@ -169,6 +169,10 @@ use dbapi\interfaces\ModelProps;";
         if ($value["Field"] == "id") {
           continue;
         }
+
+        if ($value["Null"] == "YES") {
+          continue;
+        }
         $ar[] = strtolower($value["Field"]);
       }
     }
