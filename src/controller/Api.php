@@ -156,7 +156,8 @@ class Api extends ApiSimple
             $res = $this->model->save();
         } catch (\Exception $th) {
             App::$looger->error("An error occurred during the creation of an new DB entry");
-            throw new Exception("Database Exception", 500);
+            App::$looger->error($th->getMessage());
+            throw new Exception($th->getMessage(), 500);
         }
 
         if (is_numeric($res) || $res === true) {
