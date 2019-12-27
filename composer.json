@@ -2,14 +2,15 @@
   "name": "maytrok/dbapi",
   "description": "A Simple Database model with Rest Api",
   "homepage": "https://github.com/maytrok/dbapi",
-  "version": "0.4.5",
+  "version": "0.5.0",
   "type": "library",
   "keywords": [
     "database",
     "api",
     "restapi",
     "database model",
-    "simple"
+    "simple",
+    "slim adapter"
   ],
   "authors": [
     {
@@ -43,6 +44,7 @@
     "fzaninotto/faker": "^1.9"
   },
   "suggest": {
-    "firebase/php-jwt": "JWT Auth: Required if using JWTAuththenticate Model"
+    "firebase/php-jwt": "JWT Auth: Required if using JWTAuththenticate Model",
+    "slim/slim 3.*": "SlimAdapter: Slim is required to use the SlimAdapter"
   }
 }

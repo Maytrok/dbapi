@@ -50,7 +50,8 @@ class ApiSimple
     private $privView = null;
 
     public function __construct()
-    { }
+    {
+    }
 
     protected function get()
     {
@@ -203,17 +204,20 @@ class ApiSimple
                 $this->view = call_user_func($this->_hook_output, $this->view, $_SERVER['REQUEST_METHOD']);
             }
 
-
-            $this->view->output();
+            $this->output();
         } catch (\Exception $th) {
             $this->handleError($th);
         }
     }
 
+    protected function output()
+    {
+        $this->view->output();
+    }
+
     protected final function handleError(Exception $e)
     {
 
-        if (!$this->view instanceof View) { }
         $this->view = $this->getView();
         $this->view->error($e);
     }
