@@ -215,7 +215,7 @@ class ApiSimple
         $this->view->output();
     }
 
-    protected final function handleError(Exception $e)
+    protected function handleError(Exception $e)
     {
 
         $this->view = $this->getView();
